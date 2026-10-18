@@ -350,6 +350,11 @@ fn budgets_and_words_are_read_as_people_write_them() {
     assert_eq!(time_budget_hours("half an hour"), Some(0.5));
     assert_eq!(time_budget_hours("about 2 hours, a quiet hour would do"), Some(2.0), "a number first");
     assert_eq!(time_budget_hours("a few hours"), None);
+    assert_eq!((time_budget_hours("2h"), time_budget_hours("45 mins"), time_budget_hours("90min")), (Some(2.0), Some(0.75), Some(1.5)));
+    // A number and a unit only as words of their own.
+    for request in ["yeah, something chill", "stamina management", "nah, something to examine", "vitamin-heavy farming"] {
+        assert_eq!(time_budget_hours(request), None, "{request}");
+    }
     // A word matches the start of a word, not the middle of one.
     assert!(starts_a_word("story rich", "story") && starts_a_word("a story-driven game", "story"));
     assert!(!starts_a_word("history", "story"));

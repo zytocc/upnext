@@ -8,7 +8,8 @@ use crate::db::GameView;
 /// from the request.
 pub(super) fn time_budget_hours(request: &str) -> Option<f64> {
     let lower = request.to_lowercase();
-    let re = regex::Regex::new(r"(\d+(?:\.\d+)?|an?|half an?|a couple of|couple)\s*(hours?|hrs?|h\b|minutes?|mins?)").ok()?;
+    // Whole words only: "yeah" holds "ah" and "stamina" holds "amin".
+    let re = regex::Regex::new(r"\b(\d+(?:\.\d+)?|an?|half an?|a couple of|couple)\s*(hours?|hrs?|h|minutes?|mins?)\b").ok()?;
     if let Some(c) = re.captures(&lower) {
         let n = match &c[1] {
             "a" | "an" => 1.0,
