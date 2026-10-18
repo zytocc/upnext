@@ -20,6 +20,7 @@ import { Place } from '../components/Place'
 import { HiddenByMe } from '../components/collections/HiddenByMe'
 import { hiddenLocked, usePlayers } from '../lib/players'
 import { keys, useJobs, useSettings } from '../lib/queries'
+import { allGames } from '../lib/allGames'
 
 type ListKey = 'later' | 'gems' | 'wishlist' | 'staples' | 'hidden_by_me' | OverrideStatus
 type LaterSort = 'recent' | 'shortest'
@@ -109,12 +110,12 @@ export function ListsPage() {
   const byStatus = list !== 'later' && list !== 'gems' && list !== 'wishlist' && list !== 'staples' && list !== 'hidden_by_me'
   const status = useQuery({
     queryKey: ['games', 'list', list],
-    queryFn: () => api.games({ status: [list as OverrideStatus], limit: 1000 }),
+    queryFn: () => allGames({ status: [list as OverrideStatus] }),
     enabled: byStatus,
   })
   const staples = useQuery({
     queryKey: ['games', 'staples'],
-    queryFn: () => api.games({ staple: true, sort: 'playtime', order: 'desc', limit: 1000 }),
+    queryFn: () => allGames({ staple: true, sort: 'playtime', order: 'desc' }),
     staleTime: 30_000,
   })
   const second = useQuery({ queryKey: ['second-chances'], queryFn: api.secondChances, staleTime: 30_000 })
