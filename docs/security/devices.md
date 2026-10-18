@@ -27,4 +27,4 @@ Whatever the token, and also through a proxy on this computer, these answer only
 
 ## Limits
 
-Each token gets about 10 requests a second, one pick and one Help me decide at a time. This computer has no limit.
+Each token gets about 10 requests a second, and one pick, one Help me decide, one AI test and one look at the Codex CLI at a time. This computer has no limit.

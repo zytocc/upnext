@@ -4,8 +4,9 @@
 //! against the client address the proxy names.
 //!
 //! - About 10 requests a second, with bursts of 20: beyond that, `429`.
-//! - One pick and one Help me decide at a time, since each is an AI call:
-//!   a second while the first runs gets `429` with `Retry-After`.
+//! - One pick, one Help me decide and one AI test at a time, since each is
+//!   an AI call, and one look at the Codex CLI, which starts three of its
+//!   processes: a second while the first runs gets `429` with `Retry-After`.
 
 use axum::http::Method;
 use std::collections::{HashMap, HashSet};
@@ -26,11 +27,18 @@ pub enum AiCall {
     Pick,
     /// Help me decide, on the Versus page.
     Decide,
+    /// Settings' test of the AI, a real call each time.
+    Test,
+    /// Settings' look at the Codex CLI: its version, sign-in and models.
+    Codex,
 }
 
 impl AiCall {
     /// The AI call a request makes, if it makes one (`path` without `/v1`).
     pub fn of(method: &Method, path: &str) -> Option<Self> {
+        if method == Method::GET {
+            return (path == "/api/llm/codex").then_some(Self::Codex);
+        }
         if method != Method::POST {
             return None;
         }
@@ -40,6 +48,7 @@ impl AiCall {
         match path {
             _ if picks => Some(Self::Pick),
             "/api/versus/decide" => Some(Self::Decide),
+            "/api/llm/test" => Some(Self::Test),
             _ => None,
         }
     }
@@ -48,6 +57,8 @@ impl AiCall {
         match self {
             Self::Pick => "a pick",
             Self::Decide => "a Help me decide call",
+            Self::Test => "an AI test",
+            Self::Codex => "a look at the Codex CLI",
         }
     }
 }
@@ -157,5 +168,8 @@ mod tests {
         assert_eq!(AiCall::of(&post, "/api/picks/12/feedback"), None);
         assert_eq!(AiCall::of(&Method::GET, "/api/picks/history"), None);
         assert_eq!(AiCall::of(&post, "/api/versus/decide"), Some(AiCall::Decide));
+        assert_eq!(AiCall::of(&post, "/api/llm/test"), Some(AiCall::Test));
+        assert_eq!(AiCall::of(&Method::GET, "/api/llm/codex"), Some(AiCall::Codex));
+        assert_eq!(AiCall::of(&Method::GET, "/api/llm/models"), None);
     }
 }

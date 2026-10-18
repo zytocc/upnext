@@ -339,6 +339,18 @@ async fn tokens_are_limited_this_computer_is_not() {
     drop(held);
     assert_eq!(app.ask(LAN, pick()).await.status, StatusCode::OK, "free once the first is answered");
 
+    // Settings' AI test is a real call too, and the Codex look starts processes.
+    let id = crate::server::limits::Key::Token(made.info.id);
+    let held = app.state.remote.limits.ai_call(id, crate::server::limits::AiCall::Test).unwrap();
+    let test = app.ask(LAN, Req { bearer: Some(&full), ..req("POST", "/api/v1/llm/test") }).await;
+    assert_eq!(test.status, StatusCode::TOO_MANY_REQUESTS, "{}", test.body);
+    assert!(test.body["error"].as_str().unwrap().contains("an AI test running"), "{}", test.body);
+    drop(held);
+    let held = app.state.remote.limits.ai_call(id, crate::server::limits::AiCall::Codex).unwrap();
+    let codex = app.ask(LAN, Req { bearer: Some(&full), ..req("GET", "/api/v1/llm/codex") }).await;
+    assert_eq!(codex.status, StatusCode::TOO_MANY_REQUESTS, "{}", codex.body);
+    drop(held);
+
     // About ten a second, in bursts of twenty.
     let read = app.db.token_create("dashboard", crate::db::Scope::Read, "token").unwrap().token;
     let mut statuses = vec![];

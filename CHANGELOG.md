@@ -11,6 +11,7 @@ All notable changes to UpNext are listed here. The format follows [Keep a Change
 ### Security
 
 - An uploaded GOG Galaxy database is read with SQLite's defensive mode on and its schema untrusted, so a crafted file's views and triggers can't call functions that do more than compute a value.
+- A token runs one Settings AI test and one look at the Codex CLI at a time, as it already did picks and Help me decide: each test is a real model call, and each look starts three Codex processes, so a script could run up a bill or pile up processes.
 
 ## [0.1.1] - 2026-10-16
 
