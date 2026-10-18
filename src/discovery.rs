@@ -62,7 +62,11 @@ impl Mode {
     /// The mode a request asks for, with the rest of the request: "new to
     /// me, 2 hours" is New to you with "2 hours".
     pub fn detect(request: &str) -> (Option<Mode>, String) {
-        let lower = request.to_lowercase().replace('\u{2019}', "'");
+        // The phrases are ASCII, so ASCII lowercasing finds them and keeps
+        // every byte where it was: the original is cut at the same places.
+        // Full lowercasing changes byte lengths ("İ" grows, "Å" shrinks), so
+        // its places can fall inside one of the original's characters.
+        let lower = request.to_ascii_lowercase();
         for (phrase, mode) in PHRASES {
             // Whole words only: "brand new to medieval games" isn't asking.
             let found = lower.match_indices(phrase).find(|(i, _)| {
@@ -71,11 +75,7 @@ impl Mode {
                 before.is_none_or(|c| !c.is_alphanumeric()) && after.is_none_or(|c| !c.is_alphanumeric())
             });
             if let Some((i, _)) = found {
-                // Lowercasing can change byte lengths outside ASCII; the
-                // phrases are ASCII, so cut the original where they are when
-                // it lines up, else the lowercased text.
-                let source = if lower.len() == request.len() { request } else { lower.as_str() };
-                let rest = format!("{} {}", &source[..i], &source[i + phrase.len()..]);
+                let rest = format!("{} {}", &request[..i], &request[i + phrase.len()..]);
                 let tidy = |c: char| c.is_whitespace() || matches!(c, ',' | '.' | ';' | ':' | '-' | '!' | '+' | '&');
                 let rest: String = rest.split_whitespace().collect::<Vec<_>>().join(" ");
                 let rest = rest.trim_matches(tidy).replace(" , ", ", ");
@@ -210,5 +210,15 @@ mod tests {
         assert_eq!(Mode::parse("random"), Some(Mode::Random));
         assert_eq!(Mode::detect("roll the dice"), (None, "roll the dice".into()), "only `mode` asks for a random draw");
         assert_eq!(Mode::parse("other"), None);
+    }
+
+    /// Letters whose lowercase is longer or shorter in bytes ("İ", the
+    /// ångström sign) used to move the cut into the middle of another
+    /// character, and the pick request panicked.
+    #[test]
+    fn detects_beside_letters_that_lowercase_to_other_lengths() {
+        assert_eq!(Mode::detect("İ new to me—Å"), (Some(Mode::NewToYou), "İ —Å".into()));
+        assert_eq!(Mode::detect("Hidden gems, ÅÅÅ İstanbul—noir"), (Some(Mode::Gems), "ÅÅÅ İstanbul—noir".into()));
+        assert_eq!(Mode::detect("New to me, Café’s pick"), (Some(Mode::NewToYou), "Café’s pick".into()));
     }
 }
