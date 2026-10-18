@@ -113,42 +113,64 @@ impl From<anyhow::Error> for PickError {
     }
 }
 
+// A field left out or null reads as empty, and a pick that is wrong is
+// one pick's problem, said in the retry, not the whole answer's.
 #[derive(Debug, Deserialize)]
 struct RawPick {
+    #[serde(default)]
     id: Value,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "text")]
     name: String,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "text")]
     reason: String,
 }
 
+/// The answer's lists. Spares, the wishlisted game and the suggestion are
+/// extras, read one by one so a malformed one is dropped alone.
 #[derive(Debug, Deserialize)]
 struct RawPicks {
     picks: Vec<RawPick>,
-    #[serde(default)]
-    spares: Vec<RawPick>,
+    #[serde(default, deserialize_with = "list")]
+    spares: Vec<Value>,
     /// A wishlisted game standing in for one of the picks.
     #[serde(default)]
-    wishlisted: Option<RawWish>,
+    wishlisted: Option<Value>,
     /// A game you don't own, right down your alley.
     #[serde(default)]
-    suggestion: Option<RawSuggestion>,
+    suggestion: Option<Value>,
 }
 
 #[derive(Debug, Deserialize)]
 struct RawWish {
-    id: Value,
     #[serde(default)]
+    id: Value,
+    #[serde(default, deserialize_with = "text")]
     reason: String,
+    #[serde(default)]
     instead_of: Value,
 }
 
 #[derive(Debug, Deserialize)]
 struct RawSuggestion {
-    #[serde(default)]
+    #[serde(default, deserialize_with = "text")]
     name: String,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "text")]
     reason: String,
+}
+
+/// Text, with null read as none.
+fn text<'de, D: serde::Deserializer<'de>>(d: D) -> Result<String, D::Error> {
+    Ok(Option::<String>::deserialize(d)?.unwrap_or_default())
+}
+
+/// A list, with null read as an empty one.
+fn list<'de, D: serde::Deserializer<'de>>(d: D) -> Result<Vec<Value>, D::Error> {
+    Ok(Option::<Vec<Value>>::deserialize(d)?.unwrap_or_default())
+}
+
+/// One extra as `T`, or None (logged) when it isn't one.
+fn extra<T: serde::de::DeserializeOwned>(what: &str, v: &Value) -> Option<T> {
+    serde_json::from_value(v.clone()).map_err(|e| tracing::info!("{what} dropped: {e}")).ok()
 }
 
 /// A wishlist id as the model wrote it: "w12", "W12", "12" or 12.
@@ -274,9 +296,10 @@ struct Answer {
     suggestion: Option<(String, String)>,
 }
 
-/// Validate the model's JSON against the candidate set. Picks must be
-/// exactly right, or the answer is rejected and asked again. A spare that
-/// isn't (not a candidate, a second game of a series, no reason) is dropped
+/// Validate the model's JSON against the candidate set. The lineup is the
+/// first `count` picks that hold up; with fewer, the answer is rejected and
+/// asked again. Picks past those are the first spares. A spare that isn't
+/// right (not a candidate, a second game of a series, no reason) is dropped
 /// instead: spares are a reserve, and running out only asks for more.
 /// Names come from the database (the model's is informational only).
 fn validate(json: &Value, built: &prompt::BuiltPrompt, count: usize, mut screen: Screen) -> Result<Answer, String> {
@@ -301,21 +324,25 @@ fn validate(json: &Value, built: &prompt::BuiltPrompt, count: usize, mut screen:
         Ok(Pick::of(g, reason))
     };
     let mut picks = vec![];
-    for r in &raw.picks {
+    let mut rest = raw.picks.iter();
+    for r in rest.by_ref() {
         match check(r, &mut screen) {
             Ok(p) => picks.push(p),
             Err(e) => errors.push(e),
         }
+        if picks.len() == count {
+            break;
+        }
     }
     screen.picks_done();
-    if picks.len() != count {
+    if picks.len() < count {
         errors.push(format!("expected exactly {count} valid picks, got {}", picks.len()));
-    }
-    if !errors.is_empty() {
         return Err(errors.join("; "));
     }
+    // A pick past the lineup, as some models add, is a spare.
+    let spare_picks: Vec<RawPick> = raw.spares.iter().filter_map(|v| extra("spare", v)).collect();
     let mut spares = vec![];
-    for r in &raw.spares {
+    for r in rest.chain(&spare_picks) {
         match check(r, &mut screen) {
             Ok(p) => spares.push(p),
             Err(e) => tracing::info!("spare dropped: {e}"),
@@ -323,7 +350,8 @@ fn validate(json: &Value, built: &prompt::BuiltPrompt, count: usize, mut screen:
     }
     // The wishlist's parts are extras: one that doesn't hold up is dropped,
     // and the lineup stands as picked.
-    let wished = raw.wishlisted.as_ref().and_then(|w| match wished(w, built, &picks) {
+    let wish: Option<RawWish> = raw.wishlisted.as_ref().filter(|v| !v.is_null()).and_then(|v| extra("wishlisted pick", v));
+    let wished = wish.as_ref().and_then(|w| match wished(w, built, &picks) {
         Ok(x) => Some(x),
         Err(e) => {
             tracing::info!("wishlisted pick dropped: {e}");
@@ -332,6 +360,8 @@ fn validate(json: &Value, built: &prompt::BuiltPrompt, count: usize, mut screen:
     });
     let suggestion = raw
         .suggestion
+        .filter(|v| !v.is_null())
+        .and_then(|v| extra::<RawSuggestion>("suggestion", &v))
         .filter(|_| built.suggests)
         .map(|s| (s.name.trim().to_string(), s.reason.trim().to_string()))
         .filter(|(n, r)| !n.is_empty() && !r.is_empty());

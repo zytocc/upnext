@@ -206,6 +206,29 @@ async fn a_pick_keeps_twice_as_many_spares_and_never_two_of_a_series() {
     assert_eq!(saved.usage.map(|u| u.input_tokens), Some(200), "both calls count toward the lineup");
 }
 
+/// An answer right apart from its extras stands, with no second call: a
+/// pick past the count is the first spare, and a spare, wishlisted game or
+/// suggestion that doesn't parse (an id or reason left null) is dropped.
+#[tokio::test]
+async fn an_extra_pick_or_a_malformed_extra_doesnt_cost_the_answer() {
+    let (_dir, db, cfg) = library();
+    let llm = ScriptedLlm::new(vec![Box::new(|req: &LlmRequest| {
+        let p = req.full_prompt();
+        let item = |name: &str| json!({"id": id_in(&p, name), "name": name, "reason": "Fits."});
+        Ok(json!({
+            "picks": [item("Celeste"), item("Hades"), item("Inside"), item("Limbo")],
+            "spares": [{"id": null, "reason": null}, {"id": id_in(&p, "Outer Wilds"), "name": null, "reason": "Fits."}, "Prey"],
+            "wishlisted": {"id": "w1", "reason": "Fits."},
+            "suggestion": null,
+        }))
+    })]);
+    let batch = pick(&db, &cfg, &llm, None, request("something short")).await.unwrap();
+    assert_eq!(batch.attempts, Some(1));
+    let saved = db.pick_batch(PlayerId::FIRST, &batch.batch_id).unwrap().unwrap();
+    assert_eq!(names(&saved.picks), ["Celeste", "Hades", "Inside"]);
+    assert_eq!(names(&saved.spares), ["Limbo", "Outer Wilds"]);
+}
+
 #[tokio::test]
 async fn a_retry_quotes_names_on_one_line() {
     let (_dir, db, cfg) = library();
