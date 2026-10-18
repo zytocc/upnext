@@ -10,6 +10,7 @@ All notable changes to UpNext are listed here. The format follows [Keep a Change
 
 ### Fixed
 
+- Clearing the whole library also forgets which launchers GOG Galaxy brought games from, so Settings no longer offers to leave out integrations whose games are gone.
 - A pick answer with one pick too many, or a spare, wishlisted game or suggestion with a field left empty, now stands: the extra pick becomes the first spare and a malformed extra is dropped. Such an answer used to be rejected and asked for again, a second AI call, and with the same answer twice the pick failed.
 - "It's too ___" keeps the AI's swap for the game turned down when one of the other games it says has the same problem doesn't fit, and leaves only that one out. One wrong extra used to throw the whole answer away, swap in a spare the AI hadn't chosen and say the AI couldn't check the spares.
 - An OpenAI-compatible server that refuses UpNext's schema because it is strict about it, as OpenAI's own endpoint and routers that pass strict mode on are, is asked again with the schema written as strict mode requires, before plain JSON mode. Every pick used to take two requests there and lose the schema-constrained answer. Servers that take the schema as it is, such as Ollama, LM Studio and vLLM, get the same single request as before.

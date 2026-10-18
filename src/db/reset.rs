@@ -162,6 +162,9 @@ impl Db {
                 tx.execute("DELETE FROM meta WHERE key = 'last_sync'", [])?;
                 // Without its games, the verdicts' snapshot is downloaded again.
                 tx.execute("DELETE FROM meta WHERE key LIKE 'verdicts\\_%' ESCAPE '\\'", [])?;
+                // The launchers Galaxy brought games from, which Settings
+                // offers to leave out: none until the next sync reads them.
+                tx.execute("DELETE FROM meta WHERE key = 'galaxy_integrations' OR key LIKE 'galaxy\\_integrations.%' ESCAPE '\\'", [])?;
             }
             tx.commit()?;
             Ok(())
@@ -298,6 +301,20 @@ mod tests {
 
     /// Clearing history clears the ending switch a merge kept for a split,
     /// as it clears the titles' own.
+    #[test]
+    fn a_library_reset_forgets_galaxys_integrations() {
+        let dir = tempfile::tempdir().unwrap();
+        let db = Db::open(&dir.path().join("t.db"), 60).unwrap();
+        for key in ["galaxy_integrations", "galaxy_integrations.2", "galaxy_skip_note"] {
+            db.meta_set(key, "[]").unwrap();
+        }
+        let player = crate::db::PlayerId::FIRST;
+        db.reset(&ResetParts { settings: vec![], player, steam_profile: false, taste: false, history: false, library: true }).unwrap();
+        assert_eq!(db.meta_get("galaxy_integrations").unwrap(), None);
+        assert_eq!(db.meta_get("galaxy_integrations.2").unwrap(), None, "another player's too");
+        assert!(db.meta_get("galaxy_skip_note").unwrap().is_some(), "only those keys");
+    }
+
     #[test]
     fn a_history_reset_clears_the_ending_switch_kept_for_a_split() {
         use crate::db::{ImportedGame, PlayerId};
