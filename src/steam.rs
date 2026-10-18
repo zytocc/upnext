@@ -209,10 +209,13 @@ fn parse_wishlist(body: &Value) -> Option<Vec<WishlistItem>> {
     )
 }
 
+/// A private profile answers with an empty `response`; an account that owns
+/// nothing yet (only free games, say) says `game_count: 0` and has no `games`.
 fn parse_owned_games(body: &Value) -> Result<Vec<OwnedGame>> {
     let response = body.get("response").ok_or_else(|| anyhow!("GetOwnedGames: missing 'response'"))?;
     let games = match response.get("games").and_then(Value::as_array) {
         Some(g) => g,
+        None if response.get("game_count").and_then(Value::as_u64) == Some(0) => return Ok(vec![]),
         None => bail!(
             "GetOwnedGames returned no games. Check STEAM_ID, and set Steam privacy 'Game details' to Public \
              (Profile > Edit Profile > Privacy Settings)."
@@ -708,6 +711,14 @@ mod tests {
     fn owned_games_private_profile() {
         let err = parse_owned_games(&fixture_json("steam/owned_games_private.json")).unwrap_err();
         assert!(err.to_string().contains("'Game details' to Public"), "{err}");
+    }
+
+    /// A public account that owns no paid games yet is an empty library, not
+    /// a private profile: Steam says `game_count: 0` and sends no `games`.
+    #[test]
+    fn owned_games_none_yet() {
+        assert!(parse_owned_games(&json!({"response": {"game_count": 0}})).unwrap().is_empty());
+        assert!(parse_owned_games(&json!({"response": {}})).is_err(), "a private profile still says so");
     }
 
     #[test]

@@ -10,6 +10,7 @@ All notable changes to UpNext are listed here. The format follows [Keep a Change
 
 ### Fixed
 
+- A Steam account that owns no paid games yet (only free ones, say) syncs as an empty library. Its Web API answer has no games list, which UpNext read as a private profile, so setup's key test and every sync said to make the profile public.
 - A GOG account sync whose library page comes back without its list of games now fails and leaves the library as it was. It used to end the library there, and the sync then took the games on the pages after it as gone.
 
 ### Security
