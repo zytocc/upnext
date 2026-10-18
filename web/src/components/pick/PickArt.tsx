@@ -151,6 +151,11 @@ export function PickArt({
         <div
           role="group"
           aria-label="Screenshots"
+          // A dot clicked during a keyboard preview has the focus; the
+          // preview ends when it leaves the card, as from Preview.
+          onBlur={(e) => {
+            if (!(e.relatedTarget instanceof Node && e.currentTarget.parentElement?.contains(e.relatedTarget))) stop()
+          }}
           className="absolute top-2 right-2 flex items-center rounded-full bg-black/45 px-1 py-0.5 backdrop-blur-sm"
         >
           {shots.map((s, i) => (
@@ -195,7 +200,11 @@ export function PickArt({
             choose(((showing < 0 ? (by > 0 ? -1 : 0) : showing) + by + shots.length) % shots.length)
           }
         }}
-        onBlur={() => stop()}
+        // A click on a dot moves the focus onto it first: that's still the
+        // preview, not the keyboard leaving it.
+        onBlur={(e) => {
+          if (!(e.relatedTarget instanceof Node && e.currentTarget.parentElement?.contains(e.relatedTarget))) stop()
+        }}
         className="sr-only rounded-md bg-ground/85 px-2.5 py-1.5 text-[13px] font-semibold text-ink focus-visible:not-sr-only focus-visible:absolute focus-visible:top-2 focus-visible:left-2"
       >
         Preview

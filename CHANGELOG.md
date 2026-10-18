@@ -10,6 +10,7 @@ All notable changes to UpNext are listed here. The format follows [Keep a Change
 
 ### Fixed
 
+- Clicking one of a pick's screenshot dots during a preview started with the keyboard shows that screenshot. The click took the focus off "Preview", which ended the preview before the click landed.
 - The Lists page shows every game of a list. It read only the first 1,000, so a long Shelved or Abandoned list stopped there, while its tab counted them all.
 - Clearing the whole library also forgets which launchers GOG Galaxy brought games from, so Settings no longer offers to leave out integrations whose games are gone.
 - A pick answer with one pick too many, or a spare, wishlisted game or suggestion with a field left empty, now stands: the extra pick becomes the first spare and a malformed extra is dropped. Such an answer used to be rejected and asked for again, a second AI call, and with the same answer twice the pick failed.
