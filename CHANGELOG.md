@@ -10,6 +10,7 @@ All notable changes to UpNext are listed here. The format follows [Keep a Change
 
 ### Fixed
 
+- "It's too ___" keeps the AI's swap for the game turned down when one of the other games it says has the same problem doesn't fit, and leaves only that one out. One wrong extra used to throw the whole answer away, swap in a spare the AI hadn't chosen and say the AI couldn't check the spares.
 - An OpenAI-compatible server that refuses UpNext's schema because it is strict about it, as OpenAI's own endpoint and routers that pass strict mode on are, is asked again with the schema written as strict mode requires, before plain JSON mode. Every pick used to take two requests there and lose the schema-constrained answer. Servers that take the schema as it is, such as Ollama, LM Studio and vLLM, get the same single request as before.
 - When a player's settings can't be read for a moment (the database busy with a long write), their requests no longer run as the first player, with that player's games, history and AI account; they run as themselves with only the environment's settings.
 - Cancelling a library sync stops it before the next library and ends it as cancelled. The libraries read from this computer's files (Steam's client, Heroic, Epic, Galaxy) went on, and the sync ended as "Sync complete", so setup never said the sync was stopped.

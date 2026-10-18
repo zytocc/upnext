@@ -263,41 +263,69 @@ pub(crate) fn too_schema() -> Value {
 }
 
 /// Check the AI's answer: the spare for the turned-down pick (None: no
-/// spare fits), then other picks with the same problem and theirs.
+/// spare fits), then other picks with the same problem and theirs. Only
+/// the turned-down pick's spare must fit; an "also" entry that doesn't
+/// (a game not on screen, a spare used twice or that clashes) is left out,
+/// so one wrong extra doesn't cost the answer the swap that was asked for.
 fn check_too(json: &Value, batch: &PickBatch, target: i64, series: &HashMap<i64, Vec<String>>) -> Result<Vec<(i64, Option<i64>)>, String> {
     let spare = |id: i64| batch.spares.iter().find(|p| p.id == id).and_then(|p| p.game.as_ref());
     let replacement = json.get("replacement").and_then(parse_id).ok_or("no replacement id")?;
-    let mut plan: Vec<(i64, Option<i64>)> = vec![(target, (replacement != 0).then_some(replacement))];
+    let mut also: Vec<(i64, i64)> = vec![];
     for a in json.get("also").and_then(Value::as_array).into_iter().flatten() {
         let (Some(out), Some(into)) = (a.get("pick_id").and_then(parse_id), a.get("spare_id").and_then(parse_id)) else {
-            return Err(format!("an entry of \"also\" isn't two ids: {a}"));
+            tracing::info!("\"It's too\": left out an entry of \"also\" that isn't two ids: {a}");
+            continue;
         };
         if into == 0 {
             continue;
         }
-        if !batch.picks.iter().any(|p| p.id == out && p.owned) || plan.iter().any(|(o, _)| *o == out) {
-            return Err(format!("#{out} isn't another game on screen"));
+        if out == target || !batch.picks.iter().any(|p| p.id == out && p.owned) || also.iter().any(|(o, _)| *o == out) {
+            tracing::info!("\"It's too\": left out #{out}, which isn't another game on screen");
+            continue;
         }
-        plan.push((out, Some(into)));
+        also.push((out, into));
     }
-    let leaving: Vec<i64> = plan.iter().map(|(o, _)| *o).collect();
-    let mut screen = screen_without(batch, &leaving, series);
-    let mut used: Vec<i64> = vec![];
-    for (_, into) in &plan {
-        let Some(id) = into else { continue };
-        let g = spare(*id).ok_or_else(|| format!("#{id} isn't one of the spares"))?;
-        if used.contains(id) {
-            return Err(format!("#{id} was chosen twice"));
+    // Checked against the games that stay and the spares coming in: a swap
+    // left out keeps its game on screen, so the rest is checked again.
+    loop {
+        let leaving: Vec<i64> = std::iter::once(target).chain(also.iter().map(|(o, _)| *o)).collect();
+        let mut screen = screen_without(batch, &leaving, series);
+        let mut used: Vec<i64> = vec![];
+        let mut fits = |id: i64| -> Result<(), String> {
+            let g = spare(id).ok_or_else(|| format!("#{id} isn't one of the spares"))?;
+            if used.contains(&id) {
+                return Err(format!("#{id} was chosen twice"));
+            }
+            if g.offer().is_none() {
+                return Err(format!("#{id} can't be picked any more"));
+            }
+            if let Some(e) = screen.clash(g) {
+                return Err(e);
+            }
+            screen.add(g);
+            used.push(id);
+            Ok(())
+        };
+        if replacement != 0 {
+            fits(replacement)?;
         }
-        if g.offer().is_none() {
-            return Err(format!("#{id} can't be picked any more"));
+        let mut dropped = None;
+        for (i, (out, into)) in also.iter().enumerate() {
+            if let Err(e) = fits(*into) {
+                tracing::info!("\"It's too\": left out #{out}'s swap: {e}");
+                dropped = Some(i);
+                break;
+            }
         }
-        if let Some(e) = screen.clash(g) {
-            return Err(e);
+        match dropped {
+            Some(i) => {
+                also.remove(i);
+            }
+            None => break,
         }
-        screen.add(g);
-        used.push(*id);
     }
+    let mut plan: Vec<(i64, Option<i64>)> = vec![(target, (replacement != 0).then_some(replacement))];
+    plan.extend(also.into_iter().map(|(out, into)| (out, Some(into))));
     Ok(plan)
 }
 

@@ -184,6 +184,27 @@ async fn too_swaps_its_slot_and_any_pick_with_the_same_problem_in_one_call() {
     assert_eq!(db.pick_batch(PlayerId::FIRST, &b).unwrap().unwrap().usage.map(|u| u.input_tokens), Some(100));
 }
 
+/// An "also" entry that doesn't fit (the turned-down game itself, a game
+/// not on screen, a spare chosen twice) is left out; the swap that was
+/// asked for still happens, and the AI isn't said to have failed.
+#[tokio::test]
+async fn too_keeps_its_swap_when_an_extra_one_is_wrong() {
+    let (_dir, db, mut cfg) = library();
+    cfg.verdicts_prompt = false;
+    let b = lineup(&db, "", &["Hollow Knight", "Celeste", "Hades"], &["Outer Wilds", "Inside", "Limbo"]);
+    let llm = ScriptedLlm::new(vec![Box::new(|req: &LlmRequest| {
+        let p = &req.prompt;
+        Ok(json!({"replacement": id_in(p, "Inside"), "also": [
+            {"pick_id": id_in(p, "Hollow Knight"), "spare_id": id_in(p, "Limbo")},
+            {"pick_id": id_in(p, "Hades"), "spare_id": id_in(p, "Inside")},
+            {"pick_id": id_in(p, "Celeste"), "spare_id": id_in(p, "Outer Wilds")}
+        ]}))
+    })]);
+    let out = too(&db, &cfg, &llm, &b, id_of(&db, "Hollow Knight"), "long").await.unwrap();
+    assert_eq!(out.ai_error, None);
+    assert_eq!(shown(&out.batch), ["Inside", "Outer Wilds", "Hades"], "Hades stays: its spare was the one already taken");
+}
+
 /// With `verdicts_prompt` on, the lines' format says what `bv` is and the
 /// call is told how far to trust it.
 #[tokio::test]
