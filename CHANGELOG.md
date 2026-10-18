@@ -10,6 +10,7 @@ All notable changes to UpNext are listed here. The format follows [Keep a Change
 
 ### Fixed
 
+- An OpenAI-compatible server that refuses UpNext's schema because it is strict about it, as OpenAI's own endpoint and routers that pass strict mode on are, is asked again with the schema written as strict mode requires, before plain JSON mode. Every pick used to take two requests there and lose the schema-constrained answer. Servers that take the schema as it is, such as Ollama, LM Studio and vLLM, get the same single request as before.
 - When a player's settings can't be read for a moment (the database busy with a long write), their requests no longer run as the first player, with that player's games, history and AI account; they run as themselves with only the environment's settings.
 - Cancelling a library sync stops it before the next library and ends it as cancelled. The libraries read from this computer's files (Steam's client, Heroic, Epic, Galaxy) went on, and the sync ended as "Sync complete", so setup never said the sync was stopped.
 - Clearing a lineup after Curate again failed no longer brings that failure back as "Curating didn't work" in the lineup's place, with a "Pick without AI" that sent the old request.

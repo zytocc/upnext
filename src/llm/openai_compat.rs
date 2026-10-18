@@ -1,8 +1,9 @@
 //! OpenAI-compatible chat completions backend: local servers (Ollama,
 //! LM Studio, llama.cpp, vLLM, LocalAI) or any hosted endpoint that speaks
 //! `POST {base}/chat/completions`. Asks for schema-constrained JSON
-//! (`response_format: json_schema`) and falls back to plain JSON mode with the
-//! schema in the prompt for servers that reject it.
+//! (`response_format: json_schema`). A server that rejects the schema is asked
+//! again with it rewritten the way strict servers (OpenAI's own) require,
+//! then in plain JSON mode with the schema in the prompt.
 
 use super::{LlmBackend, LlmError, LlmRequest, LlmResponse, Pricing, Usage};
 use async_trait::async_trait;
@@ -172,8 +173,22 @@ impl LlmBackend for OpenAiCompatBackend {
         });
         self.extra(&mut body);
         let (mut status, mut text) = self.post(&body).await?;
+        let refused = |status: reqwest::StatusCode| status.as_u16() == 400 || status.as_u16() == 422;
+        // Strict servers (OpenAI's own, and routers that pass `strict` on)
+        // refuse a schema with optional properties or without
+        // `additionalProperties: false`. Local servers take the schema as it
+        // is, with its counts, so it's rewritten only for a server that
+        // refused it.
+        let strict = super::codex_cli::strict_schema(&req.schema);
+        let mut rewritten = false;
+        if refused(status) && strict != req.schema {
+            tracing::info!("{} rejected the schema ({status}); retrying with it as strict servers ask", self.base_url);
+            body["response_format"]["json_schema"]["schema"] = strict;
+            (status, text) = self.post(&body).await?;
+            rewritten = status.is_success();
+        }
         // Older servers only know JSON mode: put the schema in the prompt instead.
-        if status.as_u16() == 400 || status.as_u16() == 422 {
+        if refused(status) {
             tracing::warn!("{} rejected json_schema ({status}); retrying in JSON mode", self.base_url);
             let system = format!(
                 "{}\n\nRespond with a single JSON object that matches this JSON Schema exactly:\n{}",
@@ -205,6 +220,9 @@ impl LlmBackend for OpenAiCompatBackend {
         }
         let resp: Value = serde_json::from_str(&text).map_err(|e| LlmError::BadOutput(format!("response is not JSON ({e})"), None))?;
         let mut out = reply(&resp, model)?;
+        if rewritten {
+            super::codex_cli::drop_added_nulls(&mut out.json, &req.schema);
+        }
         out.duration_ms = started.elapsed().as_millis() as u64;
         Ok(out)
     }
@@ -296,7 +314,8 @@ mod tests {
 
         let off = OpenAiCompatBackend::new(format!("{}/v1", server.uri()), Some("qwen".into()), None).with_thinking(Some(false));
         off.complete_json(req()).await.unwrap();
-        assert_eq!(sent(&server).await, [Some(json!({"enable_thinking": false})), Some(json!({"enable_thinking": false}))]);
+        let off_each = Some(json!({"enable_thinking": false}));
+        assert_eq!(sent(&server).await, [off_each.clone(), off_each.clone(), off_each], "the schema, strict, then JSON mode");
 
         server.reset().await;
         Mock::given(method("POST"))
@@ -306,6 +325,84 @@ mod tests {
         let default = OpenAiCompatBackend::new(format!("{}/v1", server.uri()), Some("qwen".into()), None);
         default.complete_json(req()).await.unwrap();
         assert_eq!(sent(&server).await, [None], "the model's own default");
+    }
+
+    /// A server that refuses a schema with optional properties, as OpenAI's
+    /// strict mode does, is asked again with every property required and
+    /// nullable, and the nulls that added are taken out of the reply. A
+    /// server that takes the schema (Ollama, LM Studio, vLLM) gets it once,
+    /// as it was, counts included.
+    #[tokio::test]
+    async fn a_strict_server_gets_the_schema_as_it_requires() {
+        use wiremock::matchers::{method, path};
+        use wiremock::{Match, Mock, MockServer, Request, ResponseTemplate};
+        /// OpenAI's rule: every property listed in `required`, and no other.
+        struct Strict;
+        impl Match for Strict {
+            fn matches(&self, r: &Request) -> bool {
+                let body: Value = serde_json::from_slice(&r.body).unwrap();
+                let s = &body["response_format"]["json_schema"]["schema"];
+                let keys: Vec<&String> = s["properties"].as_object().unwrap().keys().collect();
+                let required: Vec<&str> = s["required"].as_array().into_iter().flatten().filter_map(Value::as_str).collect();
+                keys.iter().all(|k| required.contains(&k.as_str())) && s["additionalProperties"] == false
+            }
+        }
+        let schema = json!({
+            "type": "object",
+            "properties": {
+                "picks": {"type": "array", "items": {"type": "integer"}, "minItems": 3, "maxItems": 3},
+                "suggestion": {"type": "string"}
+            },
+            "required": ["picks"]
+        });
+        let req = || LlmRequest {
+            system: "s".into(),
+            cached_prefix: None,
+            prompt: "p".into(),
+            schema: schema.clone(),
+            model: None,
+            background: false,
+            effort: None,
+        };
+        let answer = |content: &str| {
+            let mut r = crate::testutil::fixture_json("llm/openai_vllm_success.json");
+            r["choices"][0]["message"]["content"] = content.into();
+            ResponseTemplate::new(200).set_body_json(r)
+        };
+        let sent = |r: &Request| serde_json::from_slice::<Value>(&r.body).unwrap()["response_format"].clone();
+
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/v1/chat/completions"))
+            .and(Strict)
+            .respond_with(answer(r#"{"picks": [1, 2, 3], "suggestion": null}"#))
+            .mount(&server)
+            .await;
+        Mock::given(method("POST"))
+            .and(path("/v1/chat/completions"))
+            .respond_with(
+                ResponseTemplate::new(400).set_body_json(json!({"error": {"message": "Invalid schema: 'required' must list every key"}})),
+            )
+            .mount(&server)
+            .await;
+        let backend = OpenAiCompatBackend::new(format!("{}/v1", server.uri()), Some("gpt".into()), None);
+        let out = backend.complete_json(req()).await.unwrap();
+        assert_eq!(out.json, json!({"picks": [1, 2, 3]}), "the null for the optional suggestion is gone");
+        let reqs = server.received_requests().await.unwrap();
+        assert_eq!(reqs.len(), 2, "the schema, then the strict schema, never JSON mode");
+        assert_eq!(sent(&reqs[0])["json_schema"]["schema"], schema);
+        assert_eq!(sent(&reqs[1])["json_schema"]["schema"], crate::llm::codex_cli::strict_schema(&schema));
+
+        server.reset().await;
+        Mock::given(method("POST")).respond_with(answer(r#"{"picks": [1, 2, 3]}"#)).mount(&server).await;
+        let out = backend.complete_json(req()).await.unwrap();
+        assert_eq!(out.json, json!({"picks": [1, 2, 3]}));
+        let reqs = server.received_requests().await.unwrap();
+        assert_eq!(reqs.len(), 1);
+        assert_eq!(
+            sent(&reqs[0]),
+            json!({"type": "json_schema", "json_schema": {"name": "upnext_response", "schema": schema, "strict": true}})
+        );
     }
 
     #[test]
