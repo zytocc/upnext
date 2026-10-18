@@ -66,10 +66,13 @@ export function useLineup(batch: PickBatch | null, sources?: Source[], input?: "
     );
   };
 
-  /** Show the lineup, and fill any empty slot from new spares. */
+  /** Show the lineup, and fill any empty slot from new spares, unless the
+   *  last ask for them failed: the slot stays empty until the next lineup,
+   *  rather than every card's answer asking again (an AI call each, and the
+   *  same toast). */
   const after = (b: PickBatch) => {
     show(b);
-    if (b.picks.length < b.shown && !asking.current) more.mutate(b.batch_id);
+    if (b.picks.length < b.shown && !asking.current && !more.isError) more.mutate(b.batch_id);
   };
 
   const act = useMutation({
