@@ -114,8 +114,19 @@ fn snapshot(path: &Path, to: &Path) -> Result<Connection> {
     let src = Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX)?;
     src.busy_timeout(std::time::Duration::from_secs(5))?;
     let mut dst = Connection::open(to)?;
+    distrust(&dst)?;
     rusqlite::backup::Backup::new(&src, &mut dst)?.run_to_completion(1024, std::time::Duration::from_millis(50), None)?;
     Ok(dst)
+}
+
+/// The file can be any database someone uploads, so the copy runs none of
+/// its views' or triggers' functions that could do more than compute a
+/// value, and can't have its schema rewritten through pragmas.
+fn distrust(conn: &Connection) -> Result<()> {
+    use rusqlite::config::DbConfig;
+    conn.set_db_config(DbConfig::SQLITE_DBCONFIG_TRUSTED_SCHEMA, false)?;
+    conn.set_db_config(DbConfig::SQLITE_DBCONFIG_DEFENSIVE, true)?;
+    Ok(())
 }
 
 /// When Galaxy last saw a game played: a `LastPlayedDates` date, as text
@@ -614,6 +625,19 @@ mod tests {
         let platforms: Vec<(&str, Option<bool>)> = lib.integrations.iter().map(|i| (i.platform.as_str(), i.connected)).collect();
         assert_eq!(platforms, [("gog", None), ("epic", None), ("steam", None)], "no PlatformConnections: nothing to report");
         assert_eq!((lib.not_owned, lib.non_games), (0, 0));
+    }
+
+    #[test]
+    fn the_copy_distrusts_the_uploaded_schema() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("galaxy-2.0.db");
+        galaxy_fixture(&path);
+        let copy = snapshot(&path, &dir.path().join("copy.db")).unwrap();
+        let trusted: i64 = copy.pragma_query_value(None, "trusted_schema", |r| r.get(0)).unwrap();
+        assert_eq!(trusted, 0, "views and triggers from the file can't call unsafe functions");
+        assert!(copy.db_config(rusqlite::config::DbConfig::SQLITE_DBCONFIG_DEFENSIVE).unwrap());
+        copy.execute_batch("PRAGMA writable_schema = ON;").unwrap();
+        assert!(copy.execute("UPDATE sqlite_schema SET sql = '' WHERE 0", []).is_err(), "defensive mode keeps the schema read-only");
     }
 
     #[test]
