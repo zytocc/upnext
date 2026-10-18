@@ -23,11 +23,22 @@ function setup(last: PickBatch | null, opts: Parameters<typeof useCurate>[0] = {
       <ToastContext.Provider value={toast}>{children}</ToastContext.Provider>
     </QueryClientProvider>
   )
-  const hook = renderHook(() => useCurate(opts), { wrapper })
+  const hook = renderHook((o: Parameters<typeof useCurate>[0]) => useCurate(o), { wrapper, initialProps: opts })
   return { ...hook, invalidate }
 }
 
 describe('useCurate (R-WEB-3)', () => {
+  it('forgets a failure that came with a lineup on screen once that lineup is cleared', async () => {
+    vi.spyOn(api, 'pick').mockRejectedValue(new ApiError(502, 'the AI took too long'))
+    const { result, rerender } = setup(lineup('b1'))
+    await waitFor(() => expect(result.current.batch?.batch_id).toBe('b1'))
+    act(() => result.current.curate(ask))
+    await waitFor(() => expect(result.current.m.isError).toBe(true))
+    rerender({ hide: 'b1' })
+    await waitFor(() => expect(result.current.m.isError).toBe(false))
+    expect(result.current.batch).toBeNull()
+  })
+
   it('asks once while a request is out, however often it is asked', async () => {
     let answer: (r: PickResult) => void = () => {}
     const pick = vi.spyOn(api, 'pick').mockReturnValue(new Promise((r) => (answer = r)))

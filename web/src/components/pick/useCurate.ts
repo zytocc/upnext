@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../api'
 import type { PickBatch, PickResult, Source } from '../../types'
@@ -61,6 +61,15 @@ export function useCurate({
     },
     onError: (e, r) => onFailed?.(e, r, batch),
   })
+
+  // A lineup cleared away takes the last failure with it: the failure was
+  // a toast while the lineup showed, and with no lineup the page would show
+  // it in the lineup's place, as if it were new, offering to send that
+  // request again.
+  const { reset } = m
+  useEffect(() => {
+    if (hide) reset()
+  }, [hide, reset])
 
   // One request at a time: Enter is easy to press again while the AI takes
   // its seconds, and each would be another call.

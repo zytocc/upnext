@@ -10,6 +10,7 @@ All notable changes to UpNext are listed here. The format follows [Keep a Change
 
 ### Fixed
 
+- Clearing a lineup after Curate again failed no longer brings that failure back as "Curating didn't work" in the lineup's place, with a "Pick without AI" that sent the old request.
 - When a lineup runs out of games for an empty slot, the slot stays empty until the next lineup. Each answer on another card used to ask again, which with AI picks could be another AI call, and showed "Couldn't find another pick" each time.
 - A pick request that asks for "new to me" or "a hidden gem" beside letters whose lower case takes more or fewer bytes, such as "İ", no longer drops the connection with a panic.
 - A pick request reads a time only from a number or "an" and a unit as words of their own. "Yeah, something chill" read as an hour, and "stamina" or "vitamin" as a minute, which ranked every game with a known length as too long and kept the routine's own length from applying.
