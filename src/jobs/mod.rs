@@ -116,7 +116,12 @@ impl JobKind {
 /// "2,000 games, 3 new": what a sync did. A sync where an account, or every
 /// account of a store, failed while the rest synced says it's partial and
 /// which failed: "Partial: 2,000 games, 3 new; Steam (Sam) failed".
+/// One that read no library at all says so, since "0 games" alone reads as
+/// libraries found empty.
 pub fn sync_summary(report: &enrich::SyncReport) -> String {
+    if report.summaries.is_empty() && report.failed.is_empty() {
+        return "No library to read yet: no launcher or store account was found".into();
+    }
     let counts = enrich::sync_counts_text(&report.summaries);
     if report.failed.is_empty() { counts } else { format!("Partial: {counts}; {} failed", report.failed.join(", ")) }
 }
@@ -291,6 +296,16 @@ mod tests {
         assert_eq!(sync_summary(&report), "2,000 games, 3 new");
         report.failed = vec!["Steam (Sam)".into(), "Heroic (Alex)".into()];
         assert_eq!(sync_summary(&report), "Partial: 2,000 games, 3 new; Steam (Sam), Heroic (Alex) failed");
+    }
+
+    /// A sync that found nothing to read says that, not "0 games, 0 new";
+    /// one that read an empty library still counts it.
+    #[test]
+    fn a_sync_with_nothing_to_read_says_so() {
+        let mut report = enrich::SyncReport { summaries: vec![], failed: vec![] };
+        assert_eq!(sync_summary(&report), "No library to read yet: no launcher or store account was found");
+        report.summaries = vec![crate::db::SyncSummary { source: "gog".into(), ..Default::default() }];
+        assert_eq!(sync_summary(&report), "0 games, 0 new");
     }
 
     /// `NAMES` is every kind's `name()`, once each: a kind added to one and
