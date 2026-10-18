@@ -10,6 +10,7 @@ All notable changes to UpNext are listed here. The format follows [Keep a Change
 
 ### Fixed
 
+- Opening another game while the game sheet is showing one starts it fresh: its own art, its tags folded and no merge half chosen. The sheet used to carry those over, so after one game's picture failed to load the next could show no art at all, and a merge started on one game could offer to fold a game into itself.
 - A Steam account that owns no paid games yet (only free ones, say) syncs as an empty library. Its Web API answer has no games list, which UpNext read as a private profile, so setup's key test and every sync said to make the profile public.
 - A GOG account sync whose library page comes back without its list of games now fails and leaves the library as it was. It used to end the library there, and the sync then took the games on the pages after it as gone.
 

@@ -302,7 +302,10 @@ function SheetPanel({ game: initial, onClose, onUpdated }: { game: GameView; onC
         </button>
 
         <div ref={scrollRef} className="h-full overflow-y-auto overscroll-contain">
-          <Hero game={game} shots={shots} selected={heroShot} onSelect={setShot} onExpand={setGallery} />
+          {/* Keyed, like the sections below that hold state of their own:
+              another game swapped in starts from its own art, not from the
+              fallback the last one's broken picture had moved to. */}
+          <Hero key={game.id} game={game} shots={shots} selected={heroShot} onSelect={setShot} onExpand={setGallery} />
 
           <div className="flex flex-col gap-4 px-6 pb-10 pt-7 sm:px-10">
             <ScreenshotStrip shots={shots} name={game.name} selected={heroShot} onSelect={setShot} onExpand={setGallery} />
@@ -412,11 +415,12 @@ function SheetPanel({ game: initial, onClose, onUpdated }: { game: GameView; onC
               <PeopleSay game={game} />
               <Vibes game={game} />
               <HowItPlays game={game} />
-              <Tags game={game} />
+              <Tags key={`t${game.id}`} game={game} />
               <SeriesLine game={game} collections={collections} onOpen={openOther} />
               <PlayerReviews key={game.id} game={game} />
               <BacklogVerdict key={`v${game.id}`} game={game} offer={offerFor === game.id} onOfferDone={() => setOfferFor(null)} />
               <Details
+                key={`d${game.id}`}
                 game={game}
                 onUpdated={updated}
               />

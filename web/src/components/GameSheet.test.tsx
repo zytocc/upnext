@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router'
@@ -34,6 +34,26 @@ function mount(g: GameView, mocks?: () => void) {
 
 describe('The game sheet', () => {
   afterEach(() => vi.restoreAllMocks())
+
+  it("shows the art of a game swapped in, after the last one's art failed to load", async () => {
+    const a = { ...GAME, id: 1, name: 'First', appid: null, header_image: null, hero_url: 'https://example.org/a.jpg' } as GameView
+    const b = { ...GAME, id: 2, name: 'Second', appid: null, header_image: null, hero_url: 'https://example.org/b.jpg' } as GameView
+    const view = mount(a, () => vi.spyOn(api, 'game').mockImplementation(async (id) => (id === 2 ? b : a)))
+    const broken = view.container.querySelector('img[src="https://example.org/a.jpg"]')!
+    fireEvent.error(broken)
+    expect(view.container.querySelector('img[src="https://example.org/a.jpg"]')).toBeNull()
+    view.rerender(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter>
+          <ToastProvider>
+            <GameSheet game={b} onClose={vi.fn()} />
+          </ToastProvider>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    await screen.findByRole('heading', { name: 'Second' })
+    expect(view.container.querySelector('img[src="https://example.org/b.jpg"]')).toBeTruthy()
+  })
 
   it('names every store the game is owned on, none first', () => {
     mount(GAME)
