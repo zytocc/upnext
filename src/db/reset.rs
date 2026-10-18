@@ -299,8 +299,8 @@ mod tests {
         }
     }
 
-    /// Clearing history clears the ending switch a merge kept for a split,
-    /// as it clears the titles' own.
+    /// A library reset forgets which launchers Galaxy brought games from,
+    /// every player's, and no other meta key.
     #[test]
     fn a_library_reset_forgets_galaxys_integrations() {
         let dir = tempfile::tempdir().unwrap();
@@ -315,6 +315,8 @@ mod tests {
         assert!(db.meta_get("galaxy_skip_note").unwrap().is_some(), "only those keys");
     }
 
+    /// Clearing history clears the ending switch a merge kept for a split,
+    /// as it clears the titles' own.
     #[test]
     fn a_history_reset_clears_the_ending_switch_kept_for_a_split() {
         use crate::db::{ImportedGame, PlayerId};
