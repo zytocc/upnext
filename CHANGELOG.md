@@ -8,6 +8,10 @@ All notable changes to UpNext are listed here. The format follows [Keep a Change
 
 - Resting the mouse on a pick's art for a second now fades through the game's screenshots inside the art itself, with its top tags along the bottom and dots to pick one, and ends when the mouse moves away. The quick look it replaces opened a panel under the art that covered the card's buttons until it was closed. With reduced motion the pictures change only when a dot is chosen; keyboard users get the same from a "Preview" button that shows on focus, with the arrow keys to step, and a tap on a phone still opens the page.
 
+### Fixed
+
+- A GOG account sync whose library page comes back without its list of games now fails and leaves the library as it was. It used to end the library there, and the sync then took the games on the pages after it as gone.
+
 ### Security
 
 - An uploaded GOG Galaxy database is read with SQLite's defensive mode on and its schema untrusted, so a crafted file's views and triggers can't call functions that do more than compute a value.

@@ -384,6 +384,7 @@ impl GogClient {
         let token = self.valid_token().await?;
         let mut out = vec![];
         let mut page = 1;
+        let mut total_pages = 1;
         loop {
             let resp = send_with_backoff(&self.limiter, &Backoff::default(), || {
                 self.http
@@ -393,7 +394,9 @@ impl GogClient {
             })
             .await?;
             let body: Value = resp.json().await.context("GOG getFilteredProducts returned non-JSON")?;
-            let (games, total_pages) = parse_products_page(&body);
+            let (games, pages) = parse_products_page(&body).with_context(|| format!("GOG's library, page {page}"))?;
+            // A page that leaves the count out keeps the one an earlier page gave.
+            total_pages = pages.unwrap_or(total_pages);
             out.extend(games);
             if page >= total_pages {
                 break;
@@ -427,11 +430,17 @@ impl GogClient {
 }
 
 /// One page of `account/getFilteredProducts`: the games on it (base games
-/// only) and the total page count.
-fn parse_products_page(body: &Value) -> (Vec<ImportedGame>, i64) {
+/// only) and the total page count, when it gives one. A page with no
+/// `products` list is an error, not an empty page: a sync takes the games it
+/// returns as the whole library, so reading an error answer as "no games"
+/// would mark every game on it and the pages after it as gone.
+fn parse_products_page(body: &Value) -> Result<(Vec<ImportedGame>, Option<i64>)> {
     let mut games = vec![];
-    let total_pages = body.get("totalPages").and_then(Value::as_i64).unwrap_or(1);
-    for p in body.get("products").and_then(Value::as_array).into_iter().flatten() {
+    let total_pages = body.get("totalPages").and_then(Value::as_i64);
+    let Some(products) = body.get("products").and_then(Value::as_array) else {
+        bail!("GOG answered without a list of products: {}", body.to_string().chars().take(200).collect::<String>());
+    };
+    for p in products {
         let Some(id) = p.get("id").and_then(Value::as_i64) else { continue };
         let title = p.get("title").and_then(Value::as_str).unwrap_or("").trim().to_string();
         if title.is_empty() || p.get("isGame").and_then(Value::as_bool) == Some(false) {
@@ -461,7 +470,7 @@ fn parse_products_page(body: &Value) -> (Vec<ImportedGame>, i64) {
             run_url: Some(format!("goggalaxy://openGameView/gog_{id}")),
         });
     }
-    (games, total_pages)
+    Ok((games, total_pages))
 }
 
 /// A product's release date as YYYY-MM-DD. The API sends an object
@@ -514,8 +523,8 @@ mod tests {
 
     #[test]
     fn products_page() {
-        let (games, pages) = parse_products_page(&fixture_json("gog/filtered_products.json"));
-        assert_eq!(pages, 2);
+        let (games, pages) = parse_products_page(&fixture_json("gog/filtered_products.json")).unwrap();
+        assert_eq!(pages, Some(2));
         assert_eq!(games.len(), 1, "non-games and blank titles are skipped");
         let g = &games[0];
         assert_eq!((g.source.as_str(), g.source_id.as_str(), g.name.as_str()), ("gog", "1207658924", "The Witcher: Enhanced Edition"));
@@ -531,7 +540,7 @@ mod tests {
     fn release_date_forms() {
         let date = |v: serde_json::Value| {
             let body = serde_json::json!({"totalPages": 1, "products": [{"id": 1, "title": "X", "releaseDate": v}]});
-            parse_products_page(&body).0[0].release_date.clone()
+            parse_products_page(&body).unwrap().0[0].release_date.clone()
         };
         assert_eq!(date(serde_json::json!({"date": "2008-09-16 00:00:00.000000", "timezone": "UTC"})).as_deref(), Some("2008-09-16"));
         assert_eq!(date(serde_json::json!(1221523200)).as_deref(), Some("2008-09-16"));
@@ -694,6 +703,35 @@ mod tests {
         assert!(gog.playtime("1207658924").await.is_err());
         assert!(gog.load_token().is_some(), "a GOG outage is not a sign-out");
         assert!(gog.status().connected);
+    }
+
+    /// A later page that answers without its products (an error object
+    /// with a 200) fails the library instead of ending it there: a sync
+    /// takes what comes back as the whole library, so a short one would mark
+    /// the rest of the games as gone. A page that leaves the page count out
+    /// keeps the first page's.
+    #[tokio::test]
+    async fn a_page_without_products_fails_the_library() {
+        let server = MockServer::start().await;
+        let page = |n: &str, body: serde_json::Value| {
+            Mock::given(path("/account/getFilteredProducts"))
+                .and(query_param("page", n))
+                .respond_with(ResponseTemplate::new(200).set_body_json(body))
+        };
+        let product = |id: i64, title: &str| serde_json::json!({"id": id, "title": title, "isGame": true});
+        page("1", serde_json::json!({"totalPages": 3, "products": [product(1, "One")]})).mount(&server).await;
+        page("2", serde_json::json!({"products": [product(2, "Two")]})).mount(&server).await;
+        page("3", serde_json::json!({"error": "server_error"})).mount(&server).await;
+        let dir = tempfile::tempdir().unwrap();
+        let gog = signed_in(&dir, &server, crate::db::now() + 3600);
+        let err = gog.owned_games().await.unwrap_err();
+        assert!(format!("{err:#}").contains("page 3"), "{err:#}");
+
+        server.reset().await;
+        page("1", serde_json::json!({"totalPages": 2, "products": [product(1, "One")]})).mount(&server).await;
+        page("2", serde_json::json!({"products": [product(2, "Two")]})).mount(&server).await;
+        let names: Vec<String> = gog.owned_games().await.unwrap().into_iter().map(|g| g.name).collect();
+        assert_eq!(names, ["One", "Two"]);
     }
 
     /// The code-health review's B-STORES-5: a 403 page from in front of GOG's token
