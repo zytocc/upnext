@@ -318,6 +318,22 @@ impl Config {
         Ok(self)
     }
 
+    /// Player `p`'s settings when theirs can't be read (the database busy
+    /// or failing): the environment's, still as `p`, so their requests
+    /// read and save their own library, and for anyone but player 1 without
+    /// this computer's folders or the first AI account, which are player
+    /// 1's. Falling back to player 1's settings would answer them with
+    /// player 1's games and history.
+    pub fn unread_for(self, db: &crate::db::Db, p: PlayerId) -> Self {
+        if p == PlayerId::FIRST {
+            return self;
+        }
+        let mut alone = self.clone();
+        alone.player = Some(p);
+        alone.no_ai_account = true;
+        self.overlay(db, p, Some(p), crate::db::SettingsView::default()).unwrap_or(alone)
+    }
+
     /// These settings as player `p` has them, from the same environment.
     pub fn as_player(&self, db: &crate::db::Db, p: PlayerId) -> Result<Self> {
         self.clone().with_db_for(db, p)
@@ -327,6 +343,22 @@ impl Config {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn unread_settings_stay_the_players_own() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut cfg = crate::testutil::offline_config(dir.path());
+        cfg.steam_id = Some("76561190000000001".into());
+        cfg.anthropic_api_key = Some("sk-ant-test".into());
+        let db = crate::db::Db::open(&cfg.db_path, 120).unwrap();
+        let sam = PlayerId(2);
+        let unread = cfg.clone().unread_for(&db, sam);
+        assert_eq!(unread.whose(), sam, "not player 1's library and history");
+        assert!(unread.no_ai_account);
+        assert_eq!((unread.steam_id, unread.anthropic_api_key), (None, None), "player 1's Steam account and AI key stay theirs");
+        let first = cfg.unread_for(&db, PlayerId::FIRST);
+        assert_eq!(first.steam_id.as_deref(), Some("76561190000000001"), "player 1 keeps the environment's");
+    }
 
     #[test]
     fn the_login_name_is_offered_only_when_it_is_a_persons() {

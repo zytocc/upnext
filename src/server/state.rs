@@ -64,7 +64,10 @@ impl AppState {
     /// The settings as player `p` has them: the household's, with their own
     /// and their AI account's laid over.
     pub fn cfg_for(&self, p: PlayerId) -> Config {
-        self.base_cfg.clone().with_db_for(&self.db, p).unwrap_or_else(|_| self.base_cfg.clone())
+        self.base_cfg.clone().with_db_for(&self.db, p).unwrap_or_else(|e| {
+            tracing::warn!("couldn't read player {}'s settings: {e:#}", p.0);
+            self.base_cfg.clone().unread_for(&self.db, p)
+        })
     }
 
     /// The settings the library's own jobs run with: the AI account the
