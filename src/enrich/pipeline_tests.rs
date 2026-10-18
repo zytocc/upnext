@@ -311,6 +311,39 @@ async fn sync_reads_the_epic_launchers_installs_and_keeps_uninstalled_games() {
     assert!(t.requested().await.iter().all(|p| !p.starts_with("/library/api")), "no Epic account request without a sign-in");
 }
 
+/// A cancel ends a sync before its next library, and the sync ends as
+/// cancelled, not done: the libraries read from local files used to go on
+/// and the sync said "Sync complete".
+#[tokio::test]
+async fn a_cancelled_sync_stops_before_the_next_library() {
+    /// Cancels once the first library is done.
+    #[derive(Default)]
+    struct CancelAfterOne(std::sync::atomic::AtomicBool);
+    impl ProgressSink for CancelAfterOne {
+        fn update(&self, p: &Progress) {
+            if p.done >= 1 {
+                self.0.store(true, std::sync::atomic::Ordering::SeqCst);
+            }
+        }
+        fn log(&self, _: String) {}
+        fn cancelled(&self) -> bool {
+            self.0.load(std::sync::atomic::Ordering::SeqCst)
+        }
+    }
+    let mut t = setup().await;
+    let manifests = t._dir.path().join("epic-manifests");
+    std::fs::create_dir_all(&manifests).unwrap();
+    let m = json!({ "AppName": "RaceApp", "DisplayName": "Racer", "CatalogNamespace": "ns", "CatalogItemId": "RaceApp-id",
+        "AppCategories": ["public", "games", "applications"], "bIsIncompleteInstall": false });
+    std::fs::write(manifests.join("a.item"), m.to_string()).unwrap();
+    t.cfg.epic_manifests = Some(manifests);
+    // Heroic first, with no folder, then Epic, from its files.
+    let opts = SyncOptions { libraries: ["steam", "gog"].map(|l| (l.to_string(), false)).into(), ..Default::default() };
+    let err = run_sync(&t.db, &t.cfg, &t.clients, &opts, &CancelAfterOne::default()).await.unwrap_err();
+    assert_eq!(err.to_string(), "cancelled");
+    assert!(t.db.all_games(PlayerId::FIRST).unwrap().iter().all(|g| g.name != "Racer"), "Epic wasn't read after the cancel");
+}
+
 /// The code-health review's B-STORES-2: an Epic catalog item that keeps failing no
 /// longer fails the whole library read. The others come in, the catalog read
 /// before it is kept, and a game the library already has stays rather than

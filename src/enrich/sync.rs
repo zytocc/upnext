@@ -15,7 +15,7 @@ use super::{Clients, Progress, ProgressSink};
 use crate::config::Config;
 use crate::db::PlayerId;
 use crate::db::{Db, Failure, ImportedGame, SyncConnection, SyncSummary};
-use anyhow::Result;
+use anyhow::{Result, bail};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -225,6 +225,12 @@ pub async fn run_sync(db: &Db, cfg: &Config, clients: &Clients, opts: &SyncOptio
     sink.update(&progress);
     let mut summaries = vec![];
     for library in &active {
+        // A cancel ends the sync before the next library, which would read
+        // and write its games all the same: only some of them stop on their
+        // own, at their next request.
+        if sink.cancelled() {
+            bail!("cancelled");
+        }
         progress.current = Some(library.label().into());
         let failed_before = run.failed.lock().unwrap_or_else(|e| e.into_inner()).len();
         match library.sync(&run, &mut progress).await {
@@ -251,6 +257,9 @@ pub async fn run_sync(db: &Db, cfg: &Config, clients: &Clients, opts: &SyncOptio
     // a store with no sign-in, was skipped, not synced, so a failure with
     // nothing else read is the sync's failure: its error names each
     // account that failed and why.
+    if sink.cancelled() {
+        bail!("cancelled");
+    }
     let failed = run.failed.lock().unwrap_or_else(|e| e.into_inner()).clone();
     if !failed.is_empty() && summaries.is_empty() {
         return Err(anyhow::anyhow!(failed_text(&failed)));
