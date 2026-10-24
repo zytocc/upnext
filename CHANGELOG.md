@@ -10,6 +10,7 @@ All notable changes to UpNext are listed here. The format follows [Keep a Change
 
 ### Fixed
 
+- The Claude Code CLI works as an AI backend when it prints its whole message stream as a JSON array instead of the result alone, as it does in verbose mode. Every call and the setup's AI test failed with "result is not JSON". Thanks to avi12 for the fix.
 - A sync that found no launcher or store account to read says so ("No library to read yet") in its summary, which setup shows under the sync, instead of "0 games, 0 new" as if libraries had been read and found empty.
 - Clicking one of a pick's screenshot dots during a preview started with the keyboard shows that screenshot. The click took the focus off "Preview", which ended the preview before the click landed.
 - The Lists page shows every game of a list. It read only the first 1,000, so a long Shelved or Abandoned list stopped there, while its tab counted them all.
