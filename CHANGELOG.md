@@ -4,12 +4,17 @@ All notable changes to UpNext are listed here. The format follows [Keep a Change
 
 ## [Unreleased]
 
+### Added
+
+- Library › Add a game adds a game from no store UpNext reads: a game in an emulator, one played only with a mod, a VR game from a headset's own store. Give it a name and, if you like, where it's from ("RPCS3", "Meta Quest"), a cover link, a launcher's Play link, hours played and the last time played. It's looked up by name like any non-Steam game, and with no Steam match it gets its genres and year from Wikidata and, when where it's from names an emulator or console, its box art from libretro's thumbnails, with no keys. The game sheet can change or remove it, and "Not this game" drops a wrong match found by name. The AI sees where it's from among its stores. Thanks to avi12 for asking.
+
 ### Changed
 
 - Resting the mouse on a pick's art for a second now fades through the game's screenshots inside the art itself, with its top tags along the bottom and dots to pick one, and ends when the mouse moves away. The quick look it replaces opened a panel under the art that covered the card's buttons until it was closed. With reduced motion the pictures change only when a dot is chosen; keyboard users get the same from a "Preview" button that shows on focus, with the arrow keys to step, and a tap on a phone still opens the page.
 
 ### Fixed
 
+- A game from another store that Steam doesn't sell counts as having its details once fetching details has looked for it, so setup and the stats stop asking to fetch details for it, and its game sheet no longer says no details were fetched.
 - The Claude Code CLI works as an AI backend when it prints its whole message stream as a JSON array instead of the result alone, as it does in verbose mode. Every call and the setup's AI test failed with "result is not JSON". Thanks to avi12 for the fix.
 - A sync that found no launcher or store account to read says so ("No library to read yet") in its summary, which setup shows under the sync, instead of "0 games, 0 new" as if libraries had been read and found empty.
 - Clicking one of a pick's screenshot dots during a preview started with the keyboard shows that screenshot. The click took the focus off "Preview", which ended the preview before the click landed.

@@ -1,14 +1,17 @@
 import { Fragment, useState, type ReactNode } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { api } from '../../api'
-import type { GameView } from '../../types'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { api, ApiError } from '../../api'
+import type { Copy, GameView, OwnGame } from '../../types'
 import { minutesToText, relativeTime, storeName } from '../../lib/format'
 import { useMerge, useSplit } from './sheetActions'
-import { storeVia } from './sheetText'
+import { isAdded, storeVia } from './sheetText'
 import { gameYear } from '../../lib/gameText'
 import { useDebounced } from '../../lib/useDebounced'
 import { Row, Section } from './SheetSections'
 import { Place } from '../Place'
+import { useToast } from '../useToast'
+import { AddedGameForm } from './AddedGameForm'
+import { bodyOf, fieldsOf, useAddedChanged } from './addedGame'
 
 /** "Fold another title into this one": search, pick, confirm. */
 function MergeTool({ game, onDone, onCancel }: { game: GameView; onDone: (g: GameView) => void; onCancel: () => void }) {
@@ -92,9 +95,55 @@ function MergeTool({ game, onDone, onCancel }: { game: GameView; onDone: (g: Gam
   )
 }
 
+/** What a game added from no store can do on the sheet: change it, take it
+ *  out, or say the match found by name was wrong. */
+function useAddedTools(game: GameView, onUpdated: (g: GameView) => void, onRemoved?: () => void) {
+  const { data } = useQuery({ queryKey: ['added-games'], queryFn: api.addedGames, enabled: game.copies.some(isAdded) })
+  const own = (c: Copy): OwnGame | undefined => data?.games.find((g) => g.copy_id === c.game_id)
+  const changed = useAddedChanged()
+  const toast = useToast()
+  const refresh = async (titleId: number) => {
+    changed(titleId)
+    onUpdated(await api.game(titleId))
+  }
+  const notThis = useMutation({
+    mutationFn: (g: OwnGame) => api.editAddedGame(g.copy_id, { ...bodyOf(fieldsOf(g)), look_up: false }),
+    onSuccess: async (saved) => {
+      toast.success(`${saved.game.name} won't be looked up again`, 'What was found by name is gone. Edit it to look it up again.')
+      await refresh(saved.game.title_id ?? game.id)
+    },
+    onError: (e) => toast.error("Couldn't change that game", e instanceof ApiError ? e.message : String(e)),
+  })
+  const remove = useMutation({
+    mutationFn: (g: OwnGame) => api.removeAddedGame(g.copy_id),
+    onSuccess: async (_, g) => {
+      toast.success(`Took ${g.name} out of the library`)
+      if (game.copies.length > 1) return refresh(game.id)
+      changed(game.id)
+      onRemoved?.()
+    },
+    onError: (e) => toast.error("Couldn't remove that game", e instanceof ApiError ? e.message : String(e)),
+  })
+  return { own, notThis, remove, refresh }
+}
+
 /** Developers, release, genres, the store copies (with split) and the merge tool. */
-export function Details({ game, onUpdated, extra }: { game: GameView; onUpdated: (g: GameView) => void; extra?: ReactNode }) {
+export function Details({
+  game,
+  onUpdated,
+  onRemoved,
+  extra,
+}: {
+  game: GameView
+  onUpdated: (g: GameView) => void
+  /** After the title's one copy, a game added by hand, is taken out. */
+  onRemoved?: () => void
+  extra?: ReactNode
+}) {
   const [merging, setMerging] = useState(false)
+  const [editing, setEditing] = useState<OwnGame | null>(null)
+  const [removing, setRemoving] = useState<OwnGame | null>(null)
+  const added = useAddedTools(game, onUpdated, onRemoved)
   const split = useSplit(onUpdated)
   const multi = game.copies.length > 1
   const preferredId = game.copies.find((c) => c.source === game.primary_source)?.game_id
@@ -139,6 +188,27 @@ export function Details({ game, onUpdated, extra }: { game: GameView; onUpdated:
                       Store
                     </a>
                   )}
+                  {isAdded(c) && added.own(c) && (
+                    <>
+                      {c.look_up !== false && game.steam_matched && (
+                        <button
+                          type="button"
+                          className="btn-quiet min-h-9"
+                          title="The match found by name is another game: drop it and stop looking this one up"
+                          disabled={added.notThis.isPending}
+                          onClick={() => added.notThis.mutate(added.own(c)!)}
+                        >
+                          Not this game
+                        </button>
+                      )}
+                      <button type="button" className="btn-quiet min-h-9" onClick={() => setEditing(added.own(c)!)}>
+                        Edit
+                      </button>
+                      <button type="button" className="btn-quiet min-h-9" onClick={() => setRemoving(added.own(c)!)}>
+                        Remove
+                      </button>
+                    </>
+                  )}
                   {multi && (
                     <button
                       type="button"
@@ -156,6 +226,40 @@ export function Details({ game, onUpdated, extra }: { game: GameView; onUpdated:
           </ul>
         </Row>
       </dl>
+      {editing && (
+        <div className="border-t border-line pt-4">
+          <AddedGameForm
+            key={editing.copy_id}
+            editing={editing}
+            onCancel={() => setEditing(null)}
+            onDone={(saved) => {
+              setEditing(null)
+              void added.refresh(saved.game.title_id ?? game.id)
+            }}
+          />
+        </div>
+      )}
+      {removing && (
+        <div className="flex flex-col gap-3 border-t border-line pt-4">
+          <p className="m-0 text-[15px] leading-[1.6]">
+            Take <span className="font-semibold">{removing.name}</span> out of the library? Your status, ratings and diary on it stay,
+            and come back if you add it again.
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              className="btn-outline h-11"
+              disabled={added.remove.isPending}
+              onClick={() => added.remove.mutate(removing, { onSettled: () => setRemoving(null) })}
+            >
+              {added.remove.isPending ? 'Removing…' : 'Remove it'}
+            </button>
+            <button type="button" className="btn-quiet min-h-11 px-2" disabled={added.remove.isPending} onClick={() => setRemoving(null)}>
+              Never mind
+            </button>
+          </div>
+        </div>
+      )}
       {game.steam_matched && (
         <p className="m-0 text-[13px] text-dim">
           Reviews, genres and tags were matched to this game by name on Steam, so they might describe another edition.

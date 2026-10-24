@@ -423,6 +423,7 @@ function SheetPanel({ game: initial, onClose, onUpdated }: { game: GameView; onC
                 key={`d${game.id}`}
                 game={game}
                 onUpdated={updated}
+                onRemoved={onClose}
               />
               {game.override_note && <p className="m-0 text-[14px] text-muted">Your note: {game.override_note}</p>}
               <DataLine game={game} linuxActive={linuxActive} />

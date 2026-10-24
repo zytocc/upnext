@@ -14,9 +14,17 @@ export function launcherName(launcher: string): string {
   }
 }
 
+/** A copy added one at a time from no store (source `other`), which the
+ *  sheet can change or remove. Lists of titles for a store are `manual`. */
+export function isAdded(c: { source: string }): boolean {
+  return c.source === 'other'
+}
+
 /** "GOG via Heroic", or just "Steam" when the store is its own launcher;
- *  "EA app, added by hand" for a game on a list typed in. */
-export function storeVia(c: { source: string; launcher: string }): string {
+ *  "EA app, added by hand" for a game on a list typed in, and "RPCS3, added
+ *  by hand" for one added from no store. */
+export function storeVia(c: { source: string; launcher: string; from?: string | null }): string {
+  if (isAdded(c)) return c.from ? `${c.from}, added by hand` : 'Added by hand'
   if (c.launcher === 'manual') return `${storeName(c.source)}, added by hand`
   return c.launcher === c.source ? storeName(c.source) : `${storeName(c.source)} via ${launcherName(c.launcher)}`
 }

@@ -190,6 +190,8 @@ export function storeName(source: string): string {
       return 'itch.io'
     case 'bethesda':
       return 'Bethesda.net'
+    case 'other':
+      return 'Added by hand'
     default:
       return upperFirst(source)
   }

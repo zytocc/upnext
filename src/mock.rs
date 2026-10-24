@@ -8,7 +8,7 @@
 //! library, such as CI and development containers, use it.
 
 use crate::db::PlayerId;
-use crate::db::{Db, DetailsRow, HideScope, HltbRow, ImportedGame, NewDiaryRow, Override, ReviewRow, now};
+use crate::db::{AddedGame, Db, DetailsRow, HideScope, HltbRow, ImportedGame, NewDiaryRow, Override, ReviewRow, now};
 use crate::review_tags::{self, Aspect, ReviewTags, Verdict};
 use crate::taste::{self, StatementBody, TasteRules};
 use anyhow::{Context, Result, bail};
@@ -75,6 +75,11 @@ struct Game {
     /// Windows), or `manual` (a list typed in, saved as Settings saves it).
     #[serde(default)]
     l: Option<String>,
+    /// Where a game added from no store is from ("RPCS3"), which makes it
+    /// one, added as the Library's Add a game does; `a` 0 when Steam has
+    /// no match for it.
+    #[serde(default)]
+    fr: Option<String>,
     y: i32,
     g: Vec<String>,
     t: Vec<String>,
@@ -246,11 +251,25 @@ fn fill(db: &Db, two_players: bool) -> Result<Seeded> {
     }
     // Games added by hand go in as Settings puts them, a list per store.
     let mut by_hand: BTreeMap<String, Vec<String>> = BTreeMap::new();
-    for g in lib.games.iter().filter(|g| g.l.as_deref() == Some(crate::manual::LAUNCHER)) {
+    for g in lib.games.iter().filter(|g| g.l.as_deref() == Some(crate::manual::LAUNCHER) && g.fr.is_none()) {
         by_hand.entry(g.s.clone().context("a game added by hand names its store")?).or_default().push(g.n.clone());
     }
     for (store, titles) in &by_hand {
         crate::manual::save(db, PlayerId::FIRST, store, titles)?;
+    }
+    let mut added: BTreeMap<String, i64> = BTreeMap::new();
+    for g in lib.games.iter().filter(|g| g.fr.is_some()) {
+        let game = AddedGame {
+            name: g.n.clone(),
+            from: g.fr.clone(),
+            cover_url: None,
+            play_url: None,
+            minutes: g.m,
+            last_played: g.d.filter(|_| g.m.unwrap_or(0) > 0).map(|d| t - d * DAY).unwrap_or(0),
+            installed: g.d.is_some_and(|d| d <= 60),
+            look_up: true,
+        };
+        added.insert(g.n.clone(), db.add_own_game(PlayerId::FIRST, &game)?.0);
     }
     let sam = if two_players {
         let sam = db.add_player(&second.name)?;
@@ -273,7 +292,11 @@ fn fill(db: &Db, two_players: bool) -> Result<Seeded> {
             continue;
         }
         let id = *ids.get(&g.n).with_context(|| format!("{} didn't make it into the library", g.n))?;
-        if g.s.is_some() {
+        if let Some(&copy) = added.get(&g.n).filter(|_| g.a == 0) {
+            // Steam doesn't know it: Wikidata's genres and year, as fetching details finds them.
+            db.put_steam_match(id, None)?;
+            db.put_added_facts(copy, &g.g, Some(&g.y.to_string()))?;
+        } else if g.s.is_some() {
             db.put_steam_match(id, Some((g.a, &g.n, 1.0)))?;
         }
         let details = DetailsRow {
@@ -286,7 +309,9 @@ fn fill(db: &Db, two_players: bool) -> Result<Seeded> {
             controller_support: controller_support(&g.g),
             ..Default::default()
         };
-        db.put_details(g.a, Some(&details))?;
+        if g.a != 0 {
+            db.put_details(g.a, Some(&details))?;
+        }
         let positive = g.r * g.p / 100;
         let reviews = ReviewRow {
             review_score: Some(if g.p >= 95 {
@@ -310,9 +335,11 @@ fn fill(db: &Db, two_players: bool) -> Result<Seeded> {
             total_negative: Some(g.r - positive),
             total_reviews: Some(g.r),
         };
-        db.put_reviews(g.a, Some(&reviews))?;
         let tags: Vec<(String, i64)> = g.t.iter().enumerate().map(|(i, s)| (s.clone(), 1000 - 100 * i as i64)).collect();
-        db.put_tags(g.a, Some(&tags))?;
+        if g.a != 0 {
+            db.put_reviews(g.a, Some(&reviews))?;
+            db.put_tags(g.a, Some(&tags))?;
+        }
         db.put_hltb(id, Some(&HltbRow { main_story: Some(g.h), main_extra: Some(g.h * 1.5), ..Default::default() }))?;
         db.put_digest(id, &g.says, "", &review_tags(g)?, "mock", crate::digest::DIGEST_VERSION)?;
         if let Some(st) = &g.st {
@@ -473,8 +500,16 @@ mod tests {
         launchers.dedup();
         assert_eq!(
             launchers,
-            ["epic/epic", "heroic/epic", "heroic/gog", "manual/battlenet", "origin/origin", "steam/steam", "uplay/uplay"],
-            "every kind of store copy, the EA app's and Ubisoft Connect's included"
+            ["epic/epic", "heroic/epic", "heroic/gog", "manual/battlenet", "manual/other", "origin/origin", "steam/steam", "uplay/uplay"],
+            "every kind of store copy, the EA app's, Ubisoft Connect's and games from no store included"
+        );
+        // Games added from no store: one Steam matched by name, one it doesn't know.
+        let named = |name: &str| games.iter().find(|g| g.name == name).unwrap();
+        let (okami, demons) = (named("Okami"), named("Demon's Souls"));
+        assert!(okami.steam_matched && okami.copies[0].from.as_deref() == Some("PCSX2"));
+        assert_eq!(
+            (demons.appid, demons.copies[0].from.as_deref(), demons.genres.clone()),
+            (None, Some("RPCS3"), vec!["Action".to_string(), "RPG".into()])
         );
 
         // A second player with a small Steam account of their own.

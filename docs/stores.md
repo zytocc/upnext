@@ -41,6 +41,8 @@ On Linux, Heroic brings Epic games. Without it, sign in to Epic in Settings (or 
 
 The EA app, Ubisoft Connect, Battle.net and Xbox have no sign-in UpNext can use. On Windows, the games the EA app and Ubisoft Connect installed are read from the registry, and GOG Galaxy's plugins bring the rest if you use Galaxy. Otherwise, Settings › Accounts › Games added by hand takes a list of titles, one a line, for each of those stores.
 
+A game from no store, such as one in an emulator, one played with a mod or a VR game, goes in with Library › Add a game: its name, where it's from ("RPCS3"), and if you like a cover link, a launcher link for Play, hours and the last time played. It's looked up by name like the rest, and an emulator or console's name finds its box art on libretro.
+
 ## HowLongToBeat
 
 HowLongToBeat has no public API, so UpNext reads its website's search the way a browser does, one request every 1.5 seconds, and their terms may not allow that. It's off unless you choose it: run it from Settings › Jobs (HowLongToBeat, Run now), give it a schedule there, or run `upnext enrich --with hltb`. It sends each game's name and stores the main-story, extras and completionist hours it finds. With its job on a schedule, wishlist games get their times too. Without it, picks know how long a game takes only where its review tags say its sessions are short.

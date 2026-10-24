@@ -7,6 +7,7 @@ import { LibrarySearch } from '../components/LibrarySearch'
 import { CoverGrid, CoverGridSkeleton } from '../components/library/CoverGrid'
 import { LibraryTable } from '../components/library/LibraryTable'
 import { LibraryFilters } from '../components/library/LibraryFilters'
+import { AddedGameForm } from '../components/library/AddedGameForm'
 import { defaultOrder, type LibrarySort } from '../components/library/filters'
 import { filterState, gamesQuery, useLibraryParams } from '../components/library/useLibraryParams'
 import { cx } from '../lib/format'
@@ -40,6 +41,7 @@ export function LibraryPage() {
   const { p, q, update, setView, setSort, clearFilters } = useLibraryParams(linuxActive)
   const { view, sort, order } = p
   const [detail, setDetail] = useState<GameView | null>(null)
+  const [adding, setAdding] = useState(false)
 
   const onHeaderSort = (s: LibrarySort) => setSort(s, s === sort ? (order === 'asc' ? 'desc' : 'asc') : defaultOrder(s))
 
@@ -117,7 +119,23 @@ export function LibraryPage() {
             Table
           </button>
         </div>
+        <button type="button" className="btn-quiet min-h-11 shrink-0 px-2" aria-expanded={adding} onClick={() => setAdding((a) => !a)}>
+          Add a game
+        </button>
       </section>
+
+      {adding && (
+        <section aria-label="Add a game" className="mt-6 rounded-xl border border-line p-4 sm:p-6">
+          <AddedGameForm
+            onCancel={() => setAdding(false)}
+            onDone={(saved) => {
+              setAdding(false)
+              // Open the new game's sheet as it is now; the look-up fills it in.
+              if (saved.game.title_id != null) void api.game(saved.game.title_id).then(setDetail, () => {})
+            }}
+          />
+        </section>
+      )}
 
       {error && (
         <p className="mt-8 text-bad" role="alert">

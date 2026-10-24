@@ -185,7 +185,7 @@ fn the_library_from_a_terminal() {
     // Each player's own count: Sam's library leaves out the game player 1
     // hid from them.
     let theirs = ok(&sams(&["stats"]), "Sam's stats");
-    assert!(stats.starts_with("103 games") && theirs.starts_with("102 games"), "{stats}\n{theirs}");
+    assert!(stats.starts_with("105 games") && theirs.starts_with("104 games"), "{stats}\n{theirs}");
 
     // Merging and splitting find games in the named player's library:
     // Hotline Miami, which player 1 hid from Sam, is unknown to Sam.

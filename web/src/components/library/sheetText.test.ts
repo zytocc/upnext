@@ -40,4 +40,9 @@ describe('Where a copy came from', () => {
   it('says a game on a list was added by hand', () => {
     expect(storeVia({ source: 'origin', launcher: 'manual' })).toBe('EA app, added by hand')
   })
+
+  it('names where a game from no store is from, as the player put it', () => {
+    expect(storeVia({ source: 'other', launcher: 'manual', from: 'RPCS3' })).toBe('RPCS3, added by hand')
+    expect(storeVia({ source: 'other', launcher: 'manual', from: null })).toBe('Added by hand')
+  })
 })

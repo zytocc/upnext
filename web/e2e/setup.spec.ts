@@ -51,7 +51,7 @@ test('the wizard syncs in the background once the stores are behind', async ({ p
 
   // The First sync step has what came in, and Next isn't held.
   await expect(heading(page, 'First sync')).toBeVisible()
-  await expect(page.getByText(/^103 games/)).toBeVisible()
+  await expect(page.getByText(/^105 games/)).toBeVisible()
   // The EA app's and Ubisoft Connect's installs read before stay, uninstalled.
   await expect(page.getByText(/^Last sync: 2 games, 0 new/)).toBeVisible()
   await expect(page.getByRole('button', { name: 'Next', exact: true })).toBeEnabled()

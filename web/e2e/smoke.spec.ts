@@ -459,3 +459,29 @@ test('roll the dice, then curate around it; a pick previews its screenshots', as
   await expect(page.getByRole('dialog', { name })).toBeVisible()
   await page.unroute(/\/api\/v1\/games\/\d+$/)
 })
+
+// A game from no store: added from the Library, shown with where it's
+// from, and taken out again from its sheet.
+test('add a game from no store, then remove it', async ({ page, request }) => {
+  await page.goto('/library')
+  await page.getByRole('button', { name: 'Add a game' }).click()
+  const form = page.getByRole('form', { name: 'Add a game' })
+  await form.getByLabel('Name', { exact: true }).fill('Shadow of the Colossus')
+  await form.getByLabel("Where it's from").fill('PCSX2')
+  await form.getByLabel('Hours played').fill('3')
+  // Kept from look-ups, so no job starts beside the other tests.
+  await form.getByRole('checkbox', { name: /Look it up by name/ }).uncheck()
+  await form.getByRole('button', { name: 'Add it' }).click()
+
+  const sheet = page.getByRole('dialog', { name: 'Shadow of the Colossus' })
+  await expect(sheet).toBeVisible()
+  await expect(sheet.getByText('PCSX2, added by hand')).toBeVisible()
+  const { games } = await (await request.get('/api/v1/library/added')).json()
+  expect(games.find((g: { name: string }) => g.name === 'Shadow of the Colossus')).toMatchObject({ from: 'PCSX2', minutes: 180, look_up: false })
+
+  await sheet.getByRole('button', { name: 'Remove', exact: true }).click()
+  await sheet.getByRole('button', { name: 'Remove it' }).click()
+  await expect(sheet).toBeHidden()
+  const after = await (await request.get('/api/v1/library/added')).json()
+  expect(after.games.some((g: { name: string }) => g.name === 'Shadow of the Colossus')).toBe(false)
+})
