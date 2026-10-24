@@ -121,8 +121,8 @@ crossterm_winapi 0.9.1  MIT  [61]
     https://crates.io/crates/crossterm_winapi/0.9.1
 crypto-common 0.2.2  MIT OR Apache-2.0  [86]
     https://crates.io/crates/crypto-common/0.2.2
-ctutils 0.4.3  Apache-2.0 OR MIT  [87]
-    https://crates.io/crates/ctutils/0.4.3
+ctutils 0.4.4  Apache-2.0 OR MIT  [87]
+    https://crates.io/crates/ctutils/0.4.4
 dbus 0.9.12  Apache-2.0 OR MIT  [151]
     https://crates.io/crates/dbus/0.9.12
 deranged 0.5.8  MIT OR Apache-2.0  [88]
@@ -425,8 +425,8 @@ rustls-pki-types 1.15.1  MIT OR Apache-2.0  [124]
     https://crates.io/crates/rustls-pki-types/1.15.1
 rustls-platform-verifier 0.7.1  MIT OR Apache-2.0  [125]
     https://crates.io/crates/rustls-platform-verifier/0.7.1
-rustls-webpki 0.103.15  ISC  [40]
-    https://crates.io/crates/rustls-webpki/0.103.15
+rustls-webpki 0.103.16  ISC  [40]
+    https://crates.io/crates/rustls-webpki/0.103.16
 ryu 1.0.23  Apache-2.0 OR BSL-1.0  [1, 76]
     https://crates.io/crates/ryu/1.0.23
 same-file 1.0.6  Unlicense OR MIT  [3, 160]
@@ -505,8 +505,8 @@ time-macros 0.2.32  MIT OR Apache-2.0  [161]
     https://crates.io/crates/time-macros/0.2.32
 tinystr 0.8.4  Unicode-3.0  [73]
     https://crates.io/crates/tinystr/0.8.4
-tokio 1.53.2  MIT  [69]
-    https://crates.io/crates/tokio/1.53.2
+tokio 1.53.3  MIT  [69]
+    https://crates.io/crates/tokio/1.53.3
 tokio-macros 2.7.2  MIT  [50]
     https://crates.io/crates/tokio-macros/2.7.2
 tokio-rustls 0.26.6  MIT OR Apache-2.0  [132]
@@ -2812,7 +2812,7 @@ of these licenses, at your option.
 
 ==============================================================================
 [40] LICENSE
-Used by: rustls-webpki 0.103.15
+Used by: rustls-webpki 0.103.16
 ==============================================================================
 
 Except as otherwise noted, this project is licensed under the following
@@ -3718,7 +3718,7 @@ SOFTWARE.
 
 ==============================================================================
 [69] LICENSE, MIT
-Used by: tokio 1.53.2, tokio-util 0.7.19
+Used by: tokio 1.53.3, tokio-util 0.7.19
 ==============================================================================
 
 MIT License
@@ -4629,7 +4629,7 @@ DEALINGS IN THE SOFTWARE.
 
 ==============================================================================
 [87] LICENSE-MIT
-Used by: ctutils 0.4.3
+Used by: ctutils 0.4.4
 ==============================================================================
 
 Copyright (c) 2025-2026 The RustCrypto Project Developers

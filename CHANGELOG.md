@@ -31,6 +31,9 @@ All notable changes to UpNext are listed here. The format follows [Keep a Change
 
 - An uploaded GOG Galaxy database is read with SQLite's defensive mode on and its schema untrusted, so a crafted file's views and triggers can't call functions that do more than compute a value.
 - A token runs one Settings AI test and one look at the Codex CLI at a time, as it already did picks and Help me decide: each test is a real model call, and each look starts three Codex processes, so a script could run up a bill or pile up processes.
+- rustls-webpki 0.103.16, for RUSTSEC-2026-0382: UpNext's HTTPS connections could accept a certificate chain through one of the distrusted emSign intermediate certificates, whose private keys are now known, so someone on the network holding them could pose as the server.
+- ctutils 0.4.4, for RUSTSEC-2026-0385: the constant-time helpers that the Argon2 password hashing builds on could compile to code that branches on the values it compares.
+- tokio 1.53.3, for RUSTSEC-2026-0386. UpNext doesn't build an `AsyncFd` itself, so it wasn't affected; the update keeps the dependency check passing.
 
 ## [0.1.1] - 2026-10-16
 
