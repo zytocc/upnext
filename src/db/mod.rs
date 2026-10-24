@@ -7,6 +7,7 @@
 //! store metadata (details/reviews/tags) is per appid.
 
 mod accounts;
+mod added;
 mod ai_calls;
 mod community;
 mod diary;
@@ -34,6 +35,7 @@ mod views;
 mod wishlist;
 
 pub use accounts::{AiAccount, SettingsView, StoreAccount, StoreConnection, pin_ok};
+pub use added::{AddedGame, OTHER as ADDED_SOURCE, OwnGame};
 pub use ai_calls::*;
 pub use community::{CommunitySnapshot, RECEIVE_SETTING as VERDICTS_RECEIVE, SOURCE_META as VERDICTS_SOURCE_META};
 pub use diary::{DiaryRow, NewDiaryRow};

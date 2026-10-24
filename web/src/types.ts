@@ -188,6 +188,11 @@ export interface Copy {
   last_played: number
   run_url: string
   store_url: string
+  /** Where the player says a game added from no store is from ("RPCS3");
+   *  null for every other copy. */
+  from?: string | null
+  /** Looked up by name; false only for a game added by hand kept from it. */
+  look_up?: boolean
 }
 
 /** "native" when a Linux build exists, else the ProtonDB tier. */
@@ -925,6 +930,11 @@ export type GalaxyUploaded = components['schemas']['GalaxyUploaded']
 /** Games added by hand, for the stores whose library UpNext can't read. */
 export type ByHandLists = components['schemas']['ByHandLists']
 export type ByHandSaved = components['schemas']['ByHandSaved']
+/** Games added one at a time from no store (source `other`). */
+export type AddedBody = components['schemas']['AddedBody']
+export type AddedGames = components['schemas']['AddedGames']
+export type AddedSaved = components['schemas']['AddedSaved']
+export type OwnGame = components['schemas']['OwnGame']
 /** The Epic sign-in: Settings › Accounts and the setup's store steps. */
 export type EpicStatus = components['schemas']['EpicStatus']
 export type AiEstimates = components['schemas']['Estimates']

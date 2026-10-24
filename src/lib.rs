@@ -2,6 +2,7 @@
 //! and calls the handlers in `cli`. Everything else stays private to the crate
 //! so unused code is still reported; export more as new entry points need it.
 
+mod added;
 mod ai_plan;
 mod ai_usage;
 mod announce;
@@ -33,6 +34,7 @@ mod http;
 mod igdb;
 mod installs;
 mod jobs;
+mod libretro;
 mod lifecycle;
 mod lineup;
 mod llm;

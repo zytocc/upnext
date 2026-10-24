@@ -85,6 +85,7 @@ pub struct Clients {
     pub epic: std::sync::Arc<crate::epic::EpicClient>,
     pub gogmeta: GogMetaClient,
     pub wikidata: WikidataClient,
+    pub libretro: crate::libretro::LibretroClient,
     pub pcgw: PcgwClient,
     pub protondb: ProtonDbClient,
     /// Stands in for every service's host when set; clients built later (for
@@ -108,6 +109,7 @@ impl Clients {
             hltb: HltbClient::new(http.clone(), base),
             gogmeta: GogMetaClient::new(http.clone(), base),
             wikidata: WikidataClient::new(http.clone(), base),
+            libretro: crate::libretro::LibretroClient::new(http.clone(), base),
             pcgw: PcgwClient::new(http.clone(), base),
             protondb: ProtonDbClient::new(http.clone(), base),
             // Player 1's sign-ins, on their connections; a sync
@@ -548,6 +550,9 @@ pub async fn run_enrich_with(
     let mut work: Vec<GameView> = all
         .into_iter()
         .filter(|g| run.includes(g))
+        // A game added by hand that the player keeps from look-ups is never
+        // looked up by name, on the Steam store or anywhere else.
+        .filter(|g| g.looks_up())
         .filter(|g| store.needs(g, &run).any() || titles.iter().any(|s| s.needs(g, &run)))
         .collect();
     // Games most likely to be picked first: candidates, installed, then the

@@ -91,6 +91,8 @@ pub fn platform_label(platform: &str) -> String {
         "humble" => "Humble".into(),
         "rockstar" => "Rockstar".into(),
         "bethesda" => "Bethesda.net".into(),
+        // UpNext's own: games added by hand from no store (`db::added`).
+        "other" => "Added by hand".into(),
         other => {
             let mut c = other.chars();
             c.next().map(|f| f.to_uppercase().collect::<String>() + c.as_str()).unwrap_or_default()

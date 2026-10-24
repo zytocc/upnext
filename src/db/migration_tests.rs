@@ -576,3 +576,22 @@ fn v38_leaves_a_v37_librarys_tables_as_they_were() {
         assert_eq!(snapshot(&path), (38, tables, rows));
     }
 }
+
+/// v39: a copy gains where a game added by hand is from and whether it's
+/// looked up by name, and libretro's box art names get a table. Every copy a
+/// v38 library has is looked up, as before.
+#[test]
+fn v39_adds_games_from_no_store_and_keeps_every_copy_looked_up() {
+    let (_dir, path) = seeded("schema/v38.sql");
+    let db = Db::open(&path, 120).unwrap();
+    check_seeded_rows(&db, "v39");
+    let portal = db.game(PlayerId::FIRST, 1).unwrap().unwrap();
+    assert!(portal.copies.iter().all(|c| c.look_up && c.from.is_none()), "{:?}", portal.copies);
+    let okami = AddedGame { name: "Okami".into(), from: Some("PCSX2".into()), look_up: true, ..Default::default() };
+    let (copy, title) = db.add_own_game(PlayerId::FIRST, &okami).unwrap();
+    assert_eq!(db.game(PlayerId::FIRST, title).unwrap().unwrap().copies[0].game_id, copy);
+    db.put_libretro_boxarts("Sony - PlayStation 2", &["Okami (USA)".into()]).unwrap();
+    assert_eq!(db.libretro_boxarts("Sony - PlayStation 2", 0).unwrap(), Some(vec!["Okami (USA)".to_string()]));
+    let count = |sql: &str| db.with(|c| Ok(c.query_row(sql, [], |r| r.get::<_, i64>(0))?)).unwrap();
+    assert_eq!(count("SELECT COUNT(*) FROM pragma_foreign_key_check"), 0);
+}

@@ -131,7 +131,22 @@ with the request, and say so when they decide a pick (\"other players say it's e
 pub fn candidate_line(g: &GameView, sampled_minutes: i64, linux: bool, feel: bool, bv: bool, series: Option<&str>, now: i64) -> String {
     let mut name = format!("#{} {}", g.id, crate::llm::name_line(&g.name));
     if g.owned_on.len() > 1 || g.owned_on.first().is_some_and(|s| s != "steam") {
-        name.push_str(&format!(" [{}]", g.owned_on.join(",")));
+        // A game added by hand shows where the player said it's from
+        // ("RPCS3"), which tells an emulated or VR game from a PC one.
+        let stores: Vec<String> = g
+            .owned_on
+            .iter()
+            .map(|s| match s.as_str() {
+                crate::db::ADDED_SOURCE => g
+                    .copies
+                    .iter()
+                    .find_map(|c| c.from.as_deref().filter(|_| c.source == crate::db::ADDED_SOURCE))
+                    .map(|f| crate::llm::name_line(f).replace([',', '[', ']'], " ").trim().to_string())
+                    .unwrap_or_else(|| "added by hand".into()),
+                other => other.to_string(),
+            })
+            .collect();
+        name.push_str(&format!(" [{}]", stores.join(",")));
     }
     let mut parts = vec![name];
     // Genres, tags and themes overlap a lot: one de-duplicated list. With the

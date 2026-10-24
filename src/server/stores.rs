@@ -1,11 +1,12 @@
 //! The stores beyond Steam, GOG and Heroic (docs/api/more-stores.md): the
-//! Epic sign-in, and lists of games added by hand for the stores whose owned
-//! library UpNext can't read.
+//! Epic sign-in, lists of games added by hand for the stores whose owned
+//! library UpNext can't read, and games added one at a time from no store.
 
 use super::players::Me;
-use super::{ApiError, ApiResult, AppState};
-use crate::db::PlayerId;
+use super::{ApiError, ApiResult, AppState, refused};
+use crate::db::{OwnGame, PlayerId};
 use axum::extract::{Path, State};
+use axum::http::StatusCode;
 use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
 
@@ -16,6 +17,8 @@ pub fn routes() -> Router<AppState> {
         .route("/epic/login", post(epic_login))
         .route("/library/by-hand", get(by_hand_get))
         .route("/library/by-hand/{store}", put(by_hand_put))
+        .route("/library/added", get(added_get).post(added_post))
+        .route("/library/added/{id}", put(added_put).delete(added_delete))
 }
 
 #[utoipa::path(get, path = "/epic", tag = "accounts",
@@ -119,4 +122,92 @@ async fn by_hand_put(
 ) -> ApiResult<ByHandSaved> {
     let saved = crate::manual::save(&state.db, me, &store, &body.titles).map_err(|e| ApiError::bad(format!("{e:#}")))?;
     Ok(Json(ByHandSaved { total: saved.total, added: saved.added, removed: saved.removed, lists: lists(&state, me)? }))
+}
+
+/// The games this player added from no store.
+#[derive(Debug, Serialize, utoipa::ToSchema)]
+pub struct AddedGames {
+    games: Vec<OwnGame>,
+}
+
+/// A game added or changed, and whether a job started looking it up.
+#[derive(Debug, Serialize, utoipa::ToSchema)]
+pub struct AddedSaved {
+    game: OwnGame,
+    /// A look-up of this game started; false when it's kept from look-ups,
+    /// or another job is running (the next run of Fetch details takes it).
+    looking_up: bool,
+}
+
+#[utoipa::path(get, path = "/library/added", tag = "library",
+    description = "The games this player added by hand from no store (an emulator, a mod, a headset's own store), newest first.",
+    responses((status = 200, body = AddedGames)))]
+async fn added_get(State(state): State<AppState>, Me(me): Me) -> ApiResult<AddedGames> {
+    Ok(Json(AddedGames { games: state.db.own_games(me)? }))
+}
+
+/// Look the title up now, for this title only, with the usual sources;
+/// whether the job started (another one may be running).
+fn look_up(state: &AppState, title: i64) -> bool {
+    let opts = crate::enrich::EnrichOptions { titles: vec![title], ..Default::default() };
+    super::jobs::start_job(state, crate::jobs::JobKind::Enrich(opts), None).is_ok()
+}
+
+/// The checked game, the saved copy and the job looking it up.
+fn saved(state: &AppState, me: PlayerId, copy: i64, title: i64, wanted: bool) -> Result<AddedSaved, ApiError> {
+    let game = state.db.own_game(me, copy)?.ok_or_else(|| ApiError::not_found("the game vanished"))?;
+    Ok(AddedSaved { looking_up: wanted && look_up(state, title), game })
+}
+
+fn today() -> chrono::NaiveDate {
+    chrono::Utc::now().date_naive()
+}
+
+#[utoipa::path(post, path = "/library/added", tag = "library",
+    description = "Add a game by hand from no store. It joins this player's library as an owned copy of the `other` source, \
+        with where it's from, its cover and Play links, hours and last played as given, and is looked up by name unless \
+        `look_up` is false. A Play link must be a launcher's (`steam`, `heroic`, `goggalaxy`, `com.epicgames.launcher`, `uplay`).",
+    request_body = crate::added::AddedBody,
+    responses((status = 201, body = AddedSaved),
+        (status = 400, description = "No name, a field too long, a cover that isn't https, another kind of Play link, a bad \
+            date, or the same game from the same place added already")))]
+async fn added_post(
+    State(state): State<AppState>,
+    Me(me): Me,
+    Json(body): Json<crate::added::AddedBody>,
+) -> Result<(StatusCode, Json<AddedSaved>), ApiError> {
+    let g = body.checked(today()).map_err(|r| ApiError::bad(r.0))?;
+    let (copy, title) = state.db.add_own_game(me, &g).map_err(refused)?;
+    Ok((StatusCode::CREATED, Json(saved(&state, me, copy, title, g.look_up)?)))
+}
+
+#[utoipa::path(put, path = "/library/added/{id}", tag = "library",
+    description = "Change a game this player added by hand: every field, as for adding it. A new name, or `look_up` turned \
+        off, drops its Steam match and what the look-ups found for the old name; with `look_up` on it's looked up again.",
+    params(("id" = i64, Path, description = "The copy's id (`copy_id`)")),
+    request_body = crate::added::AddedBody,
+    responses((status = 200, body = AddedSaved), (status = 400, description = "As for adding it"),
+        (status = 404, description = "Not a game this player added")))]
+async fn added_put(
+    State(state): State<AppState>,
+    Me(me): Me,
+    Path(id): Path<i64>,
+    Json(body): Json<crate::added::AddedBody>,
+) -> ApiResult<AddedSaved> {
+    let g = body.checked(today()).map_err(|r| ApiError::bad(r.0))?;
+    let title =
+        state.db.edit_own_game(me, id, &g).map_err(refused)?.ok_or_else(|| ApiError::not_found(format!("no game {id} of yours")))?;
+    Ok(Json(saved(&state, me, id, title, g.look_up)?))
+}
+
+#[utoipa::path(delete, path = "/library/added/{id}", tag = "library",
+    description = "Take a game this player added by hand out of the library. Everyone's marks, ratings and diary on it stay \
+        with the title, as for a game a store stops reporting.",
+    params(("id" = i64, Path, description = "The copy's id (`copy_id`)")),
+    responses((status = 204, description = "Removed"), (status = 404, description = "Not a game this player added")))]
+async fn added_delete(State(state): State<AppState>, Me(me): Me, Path(id): Path<i64>) -> Result<StatusCode, ApiError> {
+    if !state.db.remove_own_game(me, id)? {
+        return Err(ApiError::not_found(format!("no game {id} of yours")));
+    }
+    Ok(StatusCode::NO_CONTENT)
 }

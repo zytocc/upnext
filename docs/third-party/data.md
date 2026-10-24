@@ -20,7 +20,11 @@ The game sheet's details come partly from its genres, themes, perspectives, paci
 
 ## Wikidata
 
-`query.wikidata.org/sparql`, for cross-references by Steam app id and name, series, and the shared game data's GOG ids and store pages. Wikidata is [CC0](https://www.wikidata.org/wiki/Wikidata:Licensing), so no attribution is needed. It asks for an informative [User-Agent](https://meta.wikimedia.org/wiki/User-Agent_policy) with contact information, and [limits](https://www.mediawiki.org/wiki/Wikidata_Query_Service/User_Manual#Query_limits) each client to 60 seconds of query time a minute and 30 failed queries a minute. Courtesy credit, with CC0.
+`query.wikidata.org/sparql`, for cross-references by Steam app id and name, series, genres and release years for games added by hand, and the shared game data's GOG ids and store pages. Wikidata is [CC0](https://www.wikidata.org/wiki/Wikidata:Licensing), so no attribution is needed. It asks for an informative [User-Agent](https://meta.wikimedia.org/wiki/User-Agent_policy) with contact information, and [limits](https://www.mediawiki.org/wiki/Wikidata_Query_Service/User_Manual#Query_limits) each client to 60 seconds of query time a minute and 30 failed queries a minute. Courtesy credit, with CC0.
+
+## libretro thumbnails
+
+`thumbnails.libretro.com/<system>/Named_Boxarts/`, the folder listing of box art the libretro project (RetroArch) gathers in [libretro-thumbnails](https://github.com/libretro/libretro-thumbnails), for games added by hand from an emulator or console (enrich option `libretro`). One listing per system, kept 30 days; it sends nothing but the folder's name. Neither the server nor the repository publishes terms or a licence, and the images are the publishers' box art, so UpNext keeps only the file names and a link: the browser loads the cover from libretro's server, as it does store art. Courtesy credit.
 
 ## ProtonDB
 

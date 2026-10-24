@@ -5048,6 +5048,344 @@
         ]
       }
     },
+    "/library/added": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "description": "The games this player added by hand from no store (an emulator, a mod, a headset's own store), newest first.",
+        "operationId": "added_get",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UpNextPlayer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddedGames"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "From another device: no token, or one that isn't valid here",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Refused: the token's scope doesn't allow it, a cross-site request, or a token over plain HTTP",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests with this token (about 10 a second); see Retry-After",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "token": [
+              "read"
+            ]
+          },
+          {
+            "device": [
+              "full"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "library"
+        ],
+        "description": "Add a game by hand from no store. It joins this player's library as an owned copy of the `other` source, with where it's from, its cover and Play links, hours and last played as given, and is looked up by name unless `look_up` is false. A Play link must be a launcher's (`steam`, `heroic`, `goggalaxy`, `com.epicgames.launcher`, `uplay`).",
+        "operationId": "added_post",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UpNextPlayer"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddedBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddedSaved"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No name, a field too long, a cover that isn't https, another kind of Play link, a bad date, or the same game from the same place added already",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "From another device: no token, or one that isn't valid here",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Refused: the token's scope doesn't allow it, a cross-site request, or a token over plain HTTP",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests with this token (about 10 a second); see Retry-After",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "token": [
+              "full"
+            ]
+          },
+          {
+            "device": [
+              "full"
+            ]
+          }
+        ]
+      }
+    },
+    "/library/added/{id}": {
+      "put": {
+        "tags": [
+          "library"
+        ],
+        "description": "Change a game this player added by hand: every field, as for adding it. A new name, or `look_up` turned off, drops its Steam match and what the look-ups found for the old name; with `look_up` on it's looked up again.",
+        "operationId": "added_put",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The copy's id (`copy_id`)",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/UpNextPlayer"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddedBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddedSaved"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "As for adding it",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "From another device: no token, or one that isn't valid here",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Refused: the token's scope doesn't allow it, a cross-site request, or a token over plain HTTP",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not a game this player added",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests with this token (about 10 a second); see Retry-After",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "token": [
+              "full"
+            ]
+          },
+          {
+            "device": [
+              "full"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "library"
+        ],
+        "description": "Take a game this player added by hand out of the library. Everyone's marks, ratings and diary on it stay with the title, as for a game a store stops reporting.",
+        "operationId": "added_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The copy's id (`copy_id`)",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/UpNextPlayer"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Removed"
+          },
+          "401": {
+            "description": "From another device: no token, or one that isn't valid here",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Refused: the token's scope doesn't allow it, a cross-site request, or a token over plain HTTP",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not a game this player added",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests with this token (about 10 a second); see Retry-After",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "token": [
+              "full"
+            ]
+          },
+          {
+            "device": [
+              "full"
+            ]
+          }
+        ]
+      }
+    },
     "/titles/merge": {
       "post": {
         "tags": [
@@ -13893,6 +14231,94 @@
           }
         }
       },
+      "AddedBody": {
+        "type": "object",
+        "description": "A game as the Add a game form sends it.",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The game's name: \"Demon's Souls\"."
+          },
+          "from": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Where it's from, in the player's words: \"RPCS3\", \"Meta Quest\". An\nemulator or console's name also finds its box art on libretro."
+          },
+          "cover_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "An `https` link to its cover."
+          },
+          "play_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "A launcher link that starts it (`steam://rungameid/…`); see\n`PLAY_SCHEMES`."
+          },
+          "hours": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double",
+            "description": "Hours played so far; left out when unknown."
+          },
+          "last_played": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "When it was last played: \"2026-10-20\"."
+          },
+          "installed": {
+            "type": "boolean"
+          },
+          "look_up": {
+            "type": "boolean",
+            "description": "Look it up by name on Steam, Wikidata and the rest; on unless set false."
+          }
+        }
+      },
+      "AddedGames": {
+        "type": "object",
+        "description": "The games this player added from no store.",
+        "required": [
+          "games"
+        ],
+        "properties": {
+          "games": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OwnGame"
+            }
+          }
+        }
+      },
+      "AddedSaved": {
+        "type": "object",
+        "description": "A game added or changed, and whether a job started looking it up.",
+        "required": [
+          "game",
+          "looking_up"
+        ],
+        "properties": {
+          "game": {
+            "$ref": "#/components/schemas/OwnGame"
+          },
+          "looking_up": {
+            "type": "boolean",
+            "description": "A look-up of this game started; false when it's kept from look-ups,\nor another job is running (the next run of Fetch details takes it)."
+          }
+        }
+      },
       "AiAccount": {
         "type": "object",
         "description": "An AI account as a player sees it.",
@@ -15075,7 +15501,8 @@
           "playtime_known",
           "last_played",
           "run_url",
-          "store_url"
+          "store_url",
+          "look_up"
         ],
         "properties": {
           "game_id": {
@@ -15121,6 +15548,17 @@
           },
           "store_url": {
             "type": "string"
+          },
+          "from": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Where the player says a game added by hand is from (\"RPCS3\", \"Meta\nQuest\"); null for every other copy, and when they didn't say."
+          },
+          "look_up": {
+            "type": "boolean",
+            "description": "Whether the game is looked up by name on Steam, Wikidata and the\nrest. Only a game added by hand can be kept from it."
           }
         }
       },
@@ -17680,6 +18118,76 @@
                 "type": "null"
               }
             ]
+          }
+        }
+      },
+      "OwnGame": {
+        "type": "object",
+        "description": "A game added by hand, as `GET /library/added` lists it.",
+        "required": [
+          "copy_id",
+          "name",
+          "last_played",
+          "installed",
+          "look_up",
+          "steam_matched"
+        ],
+        "properties": {
+          "copy_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The copy's id (`games.id`), which the edit and remove routes take."
+          },
+          "title_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "The title it's grouped into, for `GET /games/{id}`."
+          },
+          "name": {
+            "type": "string"
+          },
+          "from": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "cover_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "play_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "minutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Hours played as minutes, or null when they weren't given."
+          },
+          "last_played": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "installed": {
+            "type": "boolean"
+          },
+          "look_up": {
+            "type": "boolean"
+          },
+          "steam_matched": {
+            "type": "boolean",
+            "description": "Matched to a Steam app by name."
           }
         }
       },

@@ -5,7 +5,7 @@ Every service UpNext talks to, what it calls, the terms that apply and what they
 The facts come from the services' own pages; where a page couldn't be loaded, the entry says where they came from instead. Nothing here is legal advice. Settings › About shows the attributions (`web/src/lib/credits.ts`); keep the two in step when a source is added.
 
 - [Stores](third-party/stores.md): Steam, GOG, Epic, their image servers, and the files UpNext reads locally
-- [Game data](third-party/data.md): SteamSpy, HowLongToBeat, PCGamingWiki, Wikidata, ProtonDB, RAWG, IGDB, YouTube and the pricing pages
+- [Game data](third-party/data.md): SteamSpy, HowLongToBeat, PCGamingWiki, Wikidata, libretro's thumbnails, ProtonDB, RAWG, IGDB, YouTube and the pricing pages
 - [AI](third-party/ai.md): the Claude Code and Codex CLIs, the Anthropic and OpenAI APIs, and OpenAI-compatible servers
 - [Publishing](third-party/publishing.md): the backlog verdicts service, the shared game data, and what the terms say about publishing data
 - [What the project uses](third-party/project.md): hosting and stores, the Steam copy's Linux libraries, and the Android app's libraries

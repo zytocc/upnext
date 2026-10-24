@@ -220,6 +220,50 @@ pub async fn series_for(client: &WikidataClient, qids: &[String]) -> Result<Hash
     Ok(series_info(&client.query(&q).await?))
 }
 
+/// What Wikidata says of a game for a game added by hand: its genres
+/// (P136, English labels) and the year it first came out (P577).
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct Facts {
+    pub genres: Vec<String>,
+    pub year: Option<i32>,
+}
+
+/// Facts for Wikidata items, keyed by QID. Call with at most ~200 QIDs.
+pub async fn facts_for(client: &WikidataClient, qids: &[String]) -> Result<HashMap<String, Facts>> {
+    let values: Vec<String> = qids.iter().filter(|q| valid_qid(q)).map(|q| format!("wd:{q}")).collect();
+    if values.is_empty() {
+        return Ok(HashMap::new());
+    }
+    let q = format!(
+        "SELECT ?item ?gl (MIN(?y) AS ?year) WHERE {{ VALUES ?item {{ {} }} \
+         OPTIONAL {{ ?item wdt:P136 ?g . ?g rdfs:label ?gl FILTER(lang(?gl) = \"en\") }} \
+         OPTIONAL {{ ?item wdt:P577 ?d BIND(YEAR(?d) AS ?y) }} }} GROUP BY ?item ?gl",
+        values.join(" ")
+    );
+    Ok(facts(&client.query(&q).await?))
+}
+
+fn facts(rows: &[Value]) -> HashMap<String, Facts> {
+    let mut out: HashMap<String, Facts> = HashMap::new();
+    for b in rows {
+        let Some(item) = cell(b, "item") else { continue };
+        let e = out.entry(qid_of(&item)).or_default();
+        if let Some(g) = cell(b, "gl") {
+            // Wikidata's labels are lower case ("action role-playing game");
+            // the stores' genres start with a capital.
+            let mut cs = g.chars();
+            let g = cs.next().map(|f| f.to_uppercase().collect::<String>() + cs.as_str()).unwrap_or_default();
+            if !e.genres.contains(&g) {
+                e.genres.push(g);
+            }
+        }
+        if let Some(y) = cell(b, "year").and_then(|y| y.parse::<i32>().ok()) {
+            e.year = Some(e.year.map_or(y, |old| old.min(y)));
+        }
+    }
+    out
+}
+
 fn series_info(rows: &[Value]) -> HashMap<String, SeriesInfo> {
     let mut out: HashMap<String, SeriesInfo> = HashMap::new();
     for b in rows {
@@ -367,6 +411,19 @@ pub fn label_candidates(name: &str) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn facts_take_each_genre_once_and_the_first_year() {
+        let row = |g: Option<&str>, y: &str| {
+            let mut v = serde_json::json!({"item": {"value": "http://www.wikidata.org/entity/Q1"}, "year": {"value": y}});
+            if let Some(g) = g {
+                v["gl"] = serde_json::json!({"value": g});
+            }
+            v
+        };
+        let f = facts(&[row(Some("action-adventure game"), "2006"), row(Some("action-adventure game"), "2008"), row(None, "2007")]);
+        assert_eq!(f["Q1"], Facts { genres: vec!["Action-adventure game".into()], year: Some(2006) });
+    }
 
     #[test]
     fn gog_ids() {

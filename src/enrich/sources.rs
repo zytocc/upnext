@@ -14,6 +14,7 @@ mod gog;
 mod hidden_gems;
 mod hltb;
 mod igdb;
+mod libretro;
 mod pcgw;
 mod protondb;
 mod rawg;
@@ -267,6 +268,8 @@ pub fn registry() -> Registry {
         ],
         after: vec![
             Box::new(art::Art { after_lanes: true }),
+            Box::new(wikidata::Facts),
+            Box::new(libretro::Boxart),
             Box::new(trailers::Trailers),
             Box::new(digests::Digests),
             Box::new(series_guides::SeriesGuides),
@@ -440,6 +443,7 @@ mod tests {
                 "hidden_gems",
                 "hltb",
                 "igdb",
+                "libretro",
                 "pcgw",
                 "protondb",
                 "rawg",

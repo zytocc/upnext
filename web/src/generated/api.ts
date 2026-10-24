@@ -930,6 +930,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/library/added": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The games this player added by hand from no store (an emulator, a mod, a headset's own store), newest first. */
+        get: operations["added_get"];
+        put?: never;
+        /** @description Add a game by hand from no store. It joins this player's library as an owned copy of the `other` source, with where it's from, its cover and Play links, hours and last played as given, and is looked up by name unless `look_up` is false. A Play link must be a launcher's (`steam`, `heroic`, `goggalaxy`, `com.epicgames.launcher`, `uplay`). */
+        post: operations["added_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/library/added/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description Change a game this player added by hand: every field, as for adding it. A new name, or `look_up` turned off, drops its Steam match and what the look-ups found for the old name; with `look_up` on it's looked up again. */
+        put: operations["added_put"];
+        post?: never;
+        /** @description Take a game this player added by hand out of the library. Everyone's marks, ratings and diary on it stay with the title, as for a game a store stops reporting. */
+        delete: operations["added_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/titles/merge": {
         parameters: {
             query?: never;
@@ -2496,6 +2532,46 @@ export interface components {
             /** @description `#rrggbb`; the next of the built-in colours when left out. */
             colour?: string | null;
         };
+        /** @description A game as the Add a game form sends it. */
+        AddedBody: {
+            /** @description The game's name: "Demon's Souls". */
+            name: string;
+            /**
+             * @description Where it's from, in the player's words: "RPCS3", "Meta Quest". An
+             *     emulator or console's name also finds its box art on libretro.
+             */
+            from?: string | null;
+            /** @description An `https` link to its cover. */
+            cover_url?: string | null;
+            /**
+             * @description A launcher link that starts it (`steam://rungameid/…`); see
+             *     `PLAY_SCHEMES`.
+             */
+            play_url?: string | null;
+            /**
+             * Format: double
+             * @description Hours played so far; left out when unknown.
+             */
+            hours?: number | null;
+            /** @description When it was last played: "2026-10-20". */
+            last_played?: string | null;
+            installed?: boolean;
+            /** @description Look it up by name on Steam, Wikidata and the rest; on unless set false. */
+            look_up?: boolean;
+        };
+        /** @description The games this player added from no store. */
+        AddedGames: {
+            games: components["schemas"]["OwnGame"][];
+        };
+        /** @description A game added or changed, and whether a job started looking it up. */
+        AddedSaved: {
+            game: components["schemas"]["OwnGame"];
+            /**
+             * @description A look-up of this game started; false when it's kept from look-ups,
+             *     or another job is running (the next run of Fetch details takes it).
+             */
+            looking_up: boolean;
+        };
         /** @description An AI account as a player sees it. */
         AiAccount: {
             /** Format: int64 */
@@ -2987,6 +3063,16 @@ export interface components {
             last_played: number;
             run_url: string;
             store_url: string;
+            /**
+             * @description Where the player says a game added by hand is from ("RPCS3", "Meta
+             *     Quest"); null for every other copy, and when they didn't say.
+             */
+            from?: string | null;
+            /**
+             * @description Whether the game is looked up by name on Steam, Wikidata and the
+             *     rest. Only a game added by hand can be kept from it.
+             */
+            look_up: boolean;
         };
         CurrentBody: {
             /** Format: int64 */
@@ -3840,6 +3926,34 @@ export interface components {
             status?: string | null;
             note?: string | null;
             reasons?: components["schemas"]["ReasonsBody"] | null;
+        };
+        /** @description A game added by hand, as `GET /library/added` lists it. */
+        OwnGame: {
+            /**
+             * Format: int64
+             * @description The copy's id (`games.id`), which the edit and remove routes take.
+             */
+            copy_id: number;
+            /**
+             * Format: int64
+             * @description The title it's grouped into, for `GET /games/{id}`.
+             */
+            title_id?: number | null;
+            name: string;
+            from?: string | null;
+            cover_url?: string | null;
+            play_url?: string | null;
+            /**
+             * Format: int64
+             * @description Hours played as minutes, or null when they weren't given.
+             */
+            minutes?: number | null;
+            /** Format: int64 */
+            last_played: number;
+            installed: boolean;
+            look_up: boolean;
+            /** @description Matched to a Steam app by name. */
+            steam_matched: boolean;
         };
         /** @description A player the dialog offers as the device's owner. */
         Owner: {
@@ -8888,6 +9002,251 @@ export interface operations {
             };
             /** @description Refused: the token's scope doesn't allow it, a cross-site request, or a token over plain HTTP */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Too many requests with this token (about 10 a second); see Retry-After */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    added_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The player to answer for, by id, when no token bound to a player says it. An unknown id is a 400; a player with a PIN is a 403 (a script acts for them with a token bound to them), as is another player than the token's own. */
+                "UpNext-Player"?: components["parameters"]["UpNextPlayer"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AddedGames"];
+                };
+            };
+            /** @description From another device: no token, or one that isn't valid here */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Refused: the token's scope doesn't allow it, a cross-site request, or a token over plain HTTP */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Too many requests with this token (about 10 a second); see Retry-After */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    added_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The player to answer for, by id, when no token bound to a player says it. An unknown id is a 400; a player with a PIN is a 403 (a script acts for them with a token bound to them), as is another player than the token's own. */
+                "UpNext-Player"?: components["parameters"]["UpNextPlayer"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddedBody"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AddedSaved"];
+                };
+            };
+            /** @description No name, a field too long, a cover that isn't https, another kind of Play link, a bad date, or the same game from the same place added already */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description From another device: no token, or one that isn't valid here */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Refused: the token's scope doesn't allow it, a cross-site request, or a token over plain HTTP */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Too many requests with this token (about 10 a second); see Retry-After */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    added_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The player to answer for, by id, when no token bound to a player says it. An unknown id is a 400; a player with a PIN is a 403 (a script acts for them with a token bound to them), as is another player than the token's own. */
+                "UpNext-Player"?: components["parameters"]["UpNextPlayer"];
+            };
+            path: {
+                /** @description The copy's id (`copy_id`) */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddedBody"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AddedSaved"];
+                };
+            };
+            /** @description As for adding it */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description From another device: no token, or one that isn't valid here */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Refused: the token's scope doesn't allow it, a cross-site request, or a token over plain HTTP */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not a game this player added */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Too many requests with this token (about 10 a second); see Retry-After */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    added_delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The player to answer for, by id, when no token bound to a player says it. An unknown id is a 400; a player with a PIN is a 403 (a script acts for them with a token bound to them), as is another player than the token's own. */
+                "UpNext-Player"?: components["parameters"]["UpNextPlayer"];
+            };
+            path: {
+                /** @description The copy's id (`copy_id`) */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description From another device: no token, or one that isn't valid here */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Refused: the token's scope doesn't allow it, a cross-site request, or a token over plain HTTP */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not a game this player added */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

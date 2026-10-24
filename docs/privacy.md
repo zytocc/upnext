@@ -11,12 +11,13 @@ Everything UpNext knows is in its database on your computer: `~/.local/share/upn
 | GOG | Sync, once you connect your account; fetching details and series covers, with no account | Your GOG sign-in, for sync; GOG product ids, and series games' store-page names to find their ids |
 | Epic Games | Sync, once you sign in to Epic | Your Epic sign-in; it answers with your games, their store details and your playtime |
 | Wikidata, PCGamingWiki | Fetching details and series | Game names and Steam app ids |
+| libretro thumbnails | Fetching details, for games added from an emulator | A console's name |
 | IGDB, RAWG | Fetching details, with your own credentials | Your credentials, game names |
 | HowLongToBeat | Only when you turn it on | Game names |
 | Your identity provider | Only if you set one up, when someone signs in with it | Your browser goes to it; UpNext reads its public settings and keys and sends it the sign-in's code with UpNext's client id and secret; it answers with who signed in |
 | UpNext's shared game data (`https://data.upnext.games`, or another address you give) | Once during setup, unless you untick it, and when you ask for it again (Settings › Library data, or `upnext seed apply`) | Nothing about you; like any request, it shows the server your address and UpNext's version |
 | UpNext's backlog verdicts service (`https://verdicts.upnext.games`, or another address in `verdicts_url`) | Daily, if verdicts from other players are on; and when you publish, withdraw or report a verdict | The daily download sends nothing about you; like any request, it shows the service your address and UpNext's version. A verdict you publish goes with your player's random key, never your name, accounts or library, and is published under CC0 ([Backlog verdicts](backlog-verdicts.md)) |
-| Steam, GOG, IGDB and Epic image servers | When a page shows cover art | Your browser loads the images directly, so these servers see your IP address |
+| Steam, GOG, IGDB, Epic and libretro image servers | When a page shows cover art | Your browser loads the images directly, so these servers see your IP address |
 | Anthropic, OpenAI and OpenRouter pricing pages | Weekly, to show costs | Nothing about you |
 | **The AI you chose** | When you ask for picks, or run an AI job | Below |
 

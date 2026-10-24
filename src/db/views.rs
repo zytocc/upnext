@@ -34,7 +34,8 @@ impl Db {
                ig.success, ig.genres, ig.themes, ig.keywords, ig.perspectives, ig.modes, ig.summary, ig.rating, ig.rating_count,
                rt.success, rt.items,
                dg.digest, dg.tags, dg.prompt_version, dg.vibes,
-               t.no_ending, dg.seed_date, d.controller_support
+               t.no_ending, dg.seed_date, d.controller_support,
+               g.l_from, g.look_up
         FROM games g
         JOIN titles t ON t.id = g.title_id
         LEFT JOIN details     d  ON d.appid    = t.appid
@@ -63,6 +64,8 @@ impl Db {
             last_played: r.get(11)?,
             run_url: r.get::<_, Option<String>>(19)?.unwrap_or_default(),
             store_url: r.get::<_, Option<String>>(18)?.unwrap_or_default(),
+            from: r.get(72)?,
+            look_up: r.get::<_, i64>(73)? != 0,
             name: r.get(43)?,
             edition: r.get(44)?,
             has_gog_meta: r.get::<_, Option<i64>>(45)?.is_some(),
@@ -216,7 +219,10 @@ impl Db {
             (Some(p), Some(t)) if t > 0 => Some((p * 100 + t / 2) / t),
             _ => None,
         };
-        let enriched = meta.details_success == Some(1);
+        // A game Steam doesn't sell, or one kept from look-ups, has had what
+        // fetching details can give once Steam was asked for it.
+        let unmatched = meta.appid.is_none() && (meta.match_success == Some(0) || !copies.iter().any(|(c, _)| c.look_up));
+        let enriched = meta.details_success == Some(1) || unmatched;
         let native_steam = copies.iter().any(|(c, _)| c.source == "steam");
         let header_image = if native_steam {
             meta.d_header.clone().or_else(|| meta.appid.map(header_image_url)).unwrap_or_default()

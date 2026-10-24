@@ -34,8 +34,11 @@ impl Pass for Crossref {
 
     async fn run(&self, run: &Run<'_>) -> Result<()> {
         let (db, sink) = (run.db, run.sink);
-        let pending: Vec<GameView> =
-            db.library_games()?.into_iter().filter(|g| g.status != Status::NotGame && (!g.has_xref || run.refresh)).collect();
+        let pending: Vec<GameView> = db
+            .library_games()?
+            .into_iter()
+            .filter(|g| g.status != Status::NotGame && g.looks_up() && (!g.has_xref || run.refresh))
+            .collect();
         if pending.is_empty() {
             return Ok(());
         }
@@ -82,6 +85,55 @@ impl Pass for Crossref {
         }
         run.add("wikidata", found.len());
         run.log(format!("Wikidata: {} of {} cross-referenced", found.len(), crate::enrich::plural(pending.len(), "title", "titles")));
+        Ok(())
+    }
+}
+
+/// Genres and the first year for games added by hand that Crossref linked to
+/// an item, which no store describes. After the lanes, so a game the Steam
+/// store matched meanwhile takes the store's instead.
+pub struct Facts;
+
+#[async_trait]
+impl Pass for Facts {
+    fn options(&self) -> &'static [Opt] {
+        OPTIONS
+    }
+    fn name(&self) -> &'static str {
+        "Wikidata genres for games added by hand"
+    }
+    fn lane(&self) -> &'static str {
+        "Wikidata"
+    }
+    fn wanted(&self, run: &Run<'_>) -> bool {
+        run.on("wikidata")
+    }
+    fn errors_are_fatal(&self) -> bool {
+        false
+    }
+
+    async fn run(&self, run: &Run<'_>) -> Result<()> {
+        let pending = run.db.added_without_facts()?;
+        if pending.is_empty() {
+            return Ok(());
+        }
+        let mut found = 0;
+        for chunk in pending.chunks(150) {
+            run.check_cancelled()?;
+            let qids: Vec<String> = chunk.iter().map(|(_, q)| q.clone()).collect();
+            let facts = crate::wikidata::facts_for(&run.clients.wikidata, &qids).await?;
+            for (copy, qid) in chunk {
+                let f = facts.get(qid).cloned().unwrap_or_default();
+                if !f.genres.is_empty() || f.year.is_some() {
+                    found += 1;
+                }
+                run.db.put_added_facts(*copy, &f.genres, f.year.map(|y| y.to_string()).as_deref())?;
+            }
+        }
+        run.log(format!(
+            "Wikidata: genres or a year for {found} of {}",
+            crate::enrich::plural(pending.len(), "game added by hand", "games added by hand")
+        ));
         Ok(())
     }
 }

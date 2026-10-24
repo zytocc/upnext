@@ -46,10 +46,11 @@ export const CREDITS: Credit[] = [
   {
     name: 'Wikidata',
     url: 'https://www.wikidata.org',
-    what: 'Links between stores and databases, and series',
+    what: 'Links between stores and databases, series, and genres for games added by hand',
     note: 'Wikidata data is CC0.',
     terms: { label: 'CC0 1.0', url: 'https://creativecommons.org/publicdomain/zero/1.0/' },
   },
+  { name: 'libretro', url: 'https://www.libretro.com', what: 'Box art for games added by hand from an emulator' },
   { name: 'ProtonDB', url: 'https://www.protondb.com', what: 'How well games run on Linux through Proton' },
   { name: 'GOG', url: 'https://www.gog.com', what: 'Your GOG library and playtime, store tags and reviews' },
   { name: 'Epic Games', url: 'https://store.epicgames.com', what: 'Your Epic library and playtime, when you sign in' },

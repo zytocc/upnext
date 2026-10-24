@@ -165,6 +165,12 @@ pub struct Copy {
     pub last_played: i64,
     pub run_url: String,
     pub store_url: String,
+    /// Where the player says a game added by hand is from ("RPCS3", "Meta
+    /// Quest"); null for every other copy, and when they didn't say.
+    pub from: Option<String>,
+    /// Whether the game is looked up by name on Steam, Wikidata and the
+    /// rest. Only a game added by hand can be kept from it.
+    pub look_up: bool,
     #[serde(skip)]
     pub has_gog_meta: bool,
     #[serde(skip)]
@@ -482,6 +488,13 @@ impl GameView {
             (0, 0)
         };
         Some((year, month, day))
+    }
+
+    /// Whether the look-ups by name (the Steam store, Wikidata, IGDB and the
+    /// rest) may take it: unless every copy is a game added by hand that the
+    /// player keeps from them. A Steam app is always looked up by its appid.
+    pub fn looks_up(&self) -> bool {
+        self.appid.is_some() || self.copies.is_empty() || self.copies.iter().any(|c| c.look_up)
     }
 
     pub fn release_year(&self) -> Option<String> {

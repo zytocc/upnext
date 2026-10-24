@@ -45,6 +45,7 @@ The UpNext server answers on `http://127.0.0.1:8787` unless set otherwise. The U
 ## Stores and sync
 
 - [Steam](api/steam.md) · [GOG](api/gog.md) · [Epic, Galaxy and the other stores](api/more-stores.md)
+- [Games added from no store](api/added-games.md): emulators, mods, VR
 - [Big screen and the Steam shortcut](api/steam-shortcut.md)
 - [Jobs](api/jobs.md) · [Starting and following jobs](api/job-routes.md)
 - [Scheduled jobs](api/schedules.md) · [Sync and enrich sources](api/sources.md)

@@ -91,6 +91,7 @@ const LIBRARY: &[&str] = &[
     "series_catalog",
     "series_guides",
     "steam_art",
+    "libretro_boxarts",
     "trailers",
     "digests",
     "seed_applies",

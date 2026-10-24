@@ -93,6 +93,9 @@ import type {
   ByHandLists,
   EpicStatus,
   ByHandSaved,
+  AddedBody,
+  AddedGames,
+  AddedSaved,
   AiEstimates,
   PickMode,
   VerdictAnswers,
@@ -525,6 +528,13 @@ export const api = {
   /** Replace a store's list of games added by hand: one title a line. */
   byHandSave: (store: string, titles: string[]) =>
     request<ByHandSaved>(`/api/v1/library/by-hand/${encodeURIComponent(store)}`, { method: 'PUT', body: JSON.stringify({ titles }) }),
+  /** The games this player added from no store: an emulator's, a mod, a headset's own store. */
+  addedGames: () => request<AddedGames>('/api/v1/library/added'),
+  addGame: (game: AddedBody) => request<AddedSaved>('/api/v1/library/added', { method: 'POST', body: JSON.stringify(game) }),
+  /** Every field, as for adding it; a new name, or look_up off, drops the old look-ups. */
+  editAddedGame: (copyId: number, game: AddedBody) =>
+    request<AddedSaved>(`/api/v1/library/added/${copyId}`, { method: 'PUT', body: JSON.stringify(game) }),
+  removeAddedGame: (copyId: number) => request<void>(`/api/v1/library/added/${copyId}`, { method: 'DELETE' }),
   /** What each AI feature would take for this library, with the AI in use. */
   aiEstimates: () => request<AiEstimates>('/api/v1/ai/estimates'),
   /** Needs no token: the pairing page asks it whether UpNext runs in its container. */

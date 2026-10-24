@@ -14,7 +14,7 @@ use super::Db;
 use anyhow::{Context, Result, bail};
 use rusqlite::{Connection, OptionalExtension, params};
 
-pub const SCHEMA_VERSION: i64 = 38;
+pub const SCHEMA_VERSION: i64 = 39;
 
 /// The oldest schema this build opens: the one UpNext was first released with.
 pub const BASELINE_VERSION: i64 = 29;
@@ -126,7 +126,9 @@ CREATE TABLE IF NOT EXISTS titles (
 );
 CREATE INDEX IF NOT EXISTS titles_appid ON titles(appid);
 -- A copy: one store account's ownership of a title (the account
--- belongs to a player, who may share it).
+-- belongs to a player, who may share it). l_from and look_up (v39) are for
+-- a game added by hand from no store (source 'other'): where the player
+-- says it's from ("RPCS3", "Meta Quest"), and whether it's looked up by name.
 CREATE TABLE IF NOT EXISTS games (
     id                INTEGER PRIMARY KEY AUTOINCREMENT,
     title_id          INTEGER REFERENCES titles(id),
@@ -154,6 +156,8 @@ CREATE TABLE IF NOT EXISTS games (
     first_seen_at     INTEGER NOT NULL,
     last_synced_at    INTEGER NOT NULL,
     removed           INTEGER NOT NULL DEFAULT 0,
+    l_from            TEXT,
+    look_up           INTEGER NOT NULL DEFAULT 1,
     UNIQUE(account_id, source_id)
 );
 CREATE INDEX IF NOT EXISTS games_title ON games(title_id);
@@ -274,6 +278,14 @@ CREATE TABLE IF NOT EXISTS igdb_meta (
     summary      TEXT,
     rating       REAL,
     rating_count INTEGER
+);
+-- The box art file names libretro's thumbnail server has for one system
+-- (its Named_Boxarts folder, "Sony - PlayStation 2"), read for covers of
+-- games added by hand: names is a JSON list of the file names without .png.
+CREATE TABLE IF NOT EXISTS libretro_boxarts (
+    system     TEXT    PRIMARY KEY,
+    fetched_at INTEGER NOT NULL,
+    names      TEXT    NOT NULL
 );
 CREATE TABLE IF NOT EXISTS xref (
     title_id     INTEGER PRIMARY KEY REFERENCES titles(id),
@@ -853,7 +865,8 @@ type Step = fn(&Connection) -> Result<()>;
 
 /// The steps from `BASELINE_VERSION` to `SCHEMA_VERSION`, one per version, in
 /// order, each with the version it brings a database to.
-const UPGRADES: &[(i64, Step)] = &[(30, v30), (31, v31), (32, v32), (33, v33), (34, v34), (35, v35), (36, v36), (37, v37), (38, v38)];
+const UPGRADES: &[(i64, Step)] =
+    &[(30, v30), (31, v31), (32, v32), (33, v33), (34, v34), (35, v35), (36, v36), (37, v37), (38, v38), (39, v39)];
 
 /// v30: ratings of picks and of games.
 fn v30(c: &Connection) -> Result<()> {
@@ -1442,6 +1455,22 @@ fn v37(c: &Connection) -> Result<()> {
 /// with; nothing reads them (`migration_tests` compares tables with their
 /// comments left out), so there is nothing to rewrite and no rows to move.
 fn v38(_c: &Connection) -> Result<()> {
+    Ok(())
+}
+
+/// v39: games added by hand from no store. A copy gains where the player
+/// says it's from and whether it's looked up by name, and libretro's box art
+/// names are kept per system. Every copy so far is looked up, as before.
+fn v39(c: &Connection) -> Result<()> {
+    c.execute_batch(
+        "ALTER TABLE games ADD COLUMN l_from TEXT;
+         ALTER TABLE games ADD COLUMN look_up INTEGER NOT NULL DEFAULT 1;
+         CREATE TABLE libretro_boxarts (
+            system     TEXT    PRIMARY KEY,
+            fetched_at INTEGER NOT NULL,
+            names      TEXT    NOT NULL
+         );",
+    )?;
     Ok(())
 }
 
