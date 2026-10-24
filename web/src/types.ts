@@ -1018,8 +1018,9 @@ export interface Settings {
   igdb_client_id: string | null
   igdb_secret_set: boolean
   /** "claude-cli" (Claude subscription, via `claude -p`), "codex-cli" (ChatGPT
-   *  subscription, via `codex exec`), "api-key" (Anthropic API), "openai-key"
-   *  (OpenAI API) or "openai" (another OpenAI-style server). */
+   *  subscription, via `codex exec`), "copilot-cli" (GitHub Copilot plan, via
+   *  `copilot`), "api-key" (Anthropic API), "openai-key" (OpenAI API) or
+   *  "openai" (another OpenAI-style server). */
   llm_backend: string
   llm_backends: string[]
   /** Which backend writes review summaries, second chances and hidden gems:
@@ -1071,6 +1072,9 @@ export interface Settings {
   /** Reasoning effort; null is Codex's default for the model. */
   codex_effort: string | null
   codex_efforts: string[]
+  /** Models for llm_backend "copilot-cli", by Copilot's names: picks, and review summaries. */
+  copilot_model: string | null
+  copilot_digest_model: string | null
   /** llm_backend "openai-key": the key (never sent back), the two models, the effort. */
   openai_key_set: boolean
   openai_key_source: SettingSource
@@ -1466,6 +1470,8 @@ export interface SettingsPatch {
   codex_model?: string | null
   codex_digest_model?: string | null
   codex_effort?: string | null
+  copilot_model?: string | null
+  copilot_digest_model?: string | null
   openai_key?: string | null
   openai_key_model?: string | null
   openai_key_digest_model?: string | null
@@ -1534,6 +1540,22 @@ export interface CodexStatus {
   /** "codex" (its own catalog) or "built_in" (UpNext's list, when the catalog can't be read). */
   models_from: 'codex' | 'built_in'
   models_error: string | null
+}
+
+/** A model Settings offers for the Copilot CLI. */
+export interface CopilotModel {
+  id: string
+  name: string
+  description: string
+}
+
+/** GET /api/llm/copilot: the Copilot CLI and the models Settings offers. Its sign-in shows only on Test. */
+export interface CopilotStatus {
+  installed: boolean
+  version: string | null
+  /** Why Copilot couldn't be run. */
+  error: string | null
+  models: CopilotModel[]
 }
 
 /** GET /api/llm/openai: the GPT models an OpenAI API key can use. */

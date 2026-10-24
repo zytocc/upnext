@@ -1,7 +1,7 @@
 import { useRef, useState, type ReactNode } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api, ApiError } from '../../api'
-import type { CodexModel, LlmTestResult, Settings } from '../../types'
+import type { CodexModel, CopilotModel, LlmTestResult, Settings } from '../../types'
 import { durationText, plural } from '../../lib/format'
 import { usageText } from '../../lib/jobs'
 import { BACKEND_LABEL, summaryBackendOf } from '../../lib/ai'
@@ -64,9 +64,10 @@ export function AiChooser({ s, save, purpose = 'picks' }: { s: Settings; save: S
   const backend = forSummaries ? summaryBackend : s.llm_backend
   const local = fields && backend === 'openai'
   const codex = fields && backend === 'codex-cli'
+  const copilot = fields && backend === 'copilot-cli'
   const openaiKey = fields && backend === 'openai-key'
   // Set in the fields for the backend, not in the model rows.
-  const ownModels = local || codex || openaiKey
+  const ownModels = local || codex || copilot || openaiKey
   // "Your own server" chosen, before its address is typed: the saved
   // address still names a preset until then.
   const [ownServer, setOwnServer] = useState(false)
@@ -279,6 +280,9 @@ export function AiChooser({ s, save, purpose = 'picks' }: { s: Settings; save: S
         </div>
       )}
       {codex && <CodexFields s={s} save={save} testControl={testControl} showPicks={showPicks} showSummaries={showSummaries} />}
+      {copilot && (
+        <CopilotFields s={s} save={save} testControl={testControl} showPicks={showPicks} showSummaries={showSummaries} />
+      )}
       {openaiKey && (
         <OpenAiKeyFields s={s} save={save} testControl={testControl} showPicks={showPicks} showSummaries={showSummaries} />
       )}
@@ -313,7 +317,7 @@ function SharedAiNote() {
 export function PicksSection({ s, save }: { s: Settings; save: SaveFn }) {
   const { multi } = usePlayers()
   // Set in the fields for the backend, not in the model rows.
-  const ownModels = (b: string) => b === 'openai' || b === 'codex-cli' || b === 'openai-key'
+  const ownModels = (b: string) => b === 'openai' || b === 'codex-cli' || b === 'copilot-cli' || b === 'openai-key'
   // Summaries may have a backend of their own.
   const summaryBackend = summaryBackendOf(s)
   // An Anthropic API key's own defaults: Sonnet 5.5 for picks, Haiku 5.5
@@ -583,6 +587,82 @@ function CodexFields({
         Every AI call uses part of your ChatGPT plan's limits, shared with Codex wherever you use it. Bigger models and more
         reasoning allow fewer calls per 5 hours.
         {c?.models_from === 'built_in' && ` Codex's own model list couldn't be read, so these are UpNext's: ${c.models_error}`}
+      </p>
+    </div>
+  )
+}
+
+/** A GitHub Copilot plan through the Copilot CLI: whether it's installed,
+ *  and the two models from UpNext's list. Copilot says whether it's signed
+ *  in only on a call, so Test is how to find out. */
+function CopilotFields({
+  s,
+  save,
+  testControl,
+  showPicks,
+  showSummaries,
+}: { s: Settings; save: SaveFn; testControl: ReactNode } & FieldsFor) {
+  const status = useQuery({ queryKey: ['llm-copilot'], queryFn: api.llmCopilot, staleTime: 60_000 })
+  const c = status.data
+  const models: CopilotModel[] = c?.models ?? []
+  const nameOf = (id: string) => models.find((m) => m.id === id)?.name ?? id
+  const code = 'font-mono text-[0.85em]'
+
+  let state: ReactNode
+  if (status.isPending) state = <span className="text-dim">Checking Copilot…</span>
+  else if (status.isError) state = <span className="text-bad">Couldn't check Copilot: {String(status.error)}</span>
+  else if (c && !c.installed)
+    state = (
+      <span className="text-bad">
+        GitHub's Copilot CLI isn't installed here. Install it with <code className={code}>winget install GitHub.Copilot</code> on
+        Windows or <code className={code}>npm install -g @github/copilot</code>, then sign in with{' '}
+        <code className={code}>copilot login</code> in a terminal.
+      </span>
+    )
+  else if (c)
+    state = (
+      <span className="text-good">
+        {c.version ?? 'Copilot CLI'} is installed. Sign in once with <code className={code}>copilot login</code> in a terminal, then
+        Test.
+      </span>
+    )
+
+  const modelSelect = (label: string, value: string | null, onChange: (m: string) => void) => (
+    <label className="flex min-h-11 max-w-full min-w-0 items-center gap-2 text-[13.5px] text-dim">
+      {label}
+      <select className="field w-[240px] min-w-0 text-sm" value={value ?? ''} onChange={(e) => onChange(e.target.value)}>
+        {value && !models.some((m) => m.id === value) && <option value={value}>{value}</option>}
+        {models.map((m) => (
+          <option key={m.id} value={m.id} title={m.description}>
+            {m.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+
+  return (
+    <div className="flex min-w-0 basis-full flex-wrap items-start gap-x-5 gap-y-3 lg:pl-[140px]">
+      <p aria-live="polite" className="m-0 flex min-h-11 min-w-0 basis-full flex-wrap items-center gap-x-3 text-sm [overflow-wrap:anywhere]">
+        {state}
+        {!status.isPending && (
+          <TextButton disabled={status.isFetching} onClick={() => void status.refetch()}>
+            {status.isFetching ? 'Checking…' : 'Check again'}
+          </TextButton>
+        )}
+      </p>
+      {showPicks &&
+        modelSelect('Picks model', s.copilot_model, (m) => void save({ copilot_model: m }, `Picks model: ${nameOf(m)}`))}
+      {showSummaries &&
+        modelSelect(
+          'Summaries model',
+          s.copilot_digest_model,
+          (m) => void save({ copilot_digest_model: m }, `Summaries model: ${nameOf(m)}`),
+        )}
+      {testControl}
+      <p className="m-0 basis-full text-[13px] text-dim">
+        Every AI call counts against your Copilot plan's allowance, as any Copilot request does. Copilot Free allows only Auto.
+        UpNext turns off Copilot's tools for its calls and removes the session Copilot keeps for each one.
       </p>
     </div>
   )

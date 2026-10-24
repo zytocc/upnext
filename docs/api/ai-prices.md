@@ -10,6 +10,7 @@ Each call is priced when it comes back, from the list prices of the provider its
 |---|---|---|
 | Claude subscription (`claude-cli`) | Anthropic | no: `api_usd` is what it would cost on the API |
 | ChatGPT subscription (`codex-cli`) | OpenAI | no: `api_usd` is what it would cost on the API |
+| GitHub Copilot plan (`copilot-cli`) | none | no figure: one plan runs several providers' models |
 | Anthropic API key (`api-key`) | Anthropic | yes |
 | OpenAI API key (`openai-key`) | OpenAI | yes |
 | Another provider at `api.openai.com` | OpenAI | yes |

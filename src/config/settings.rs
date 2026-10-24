@@ -147,6 +147,16 @@ pub static SETTINGS: &[Setting] = &[
         .default("luna")
         .app(check::no_spaces),
     Setting::new("codex_effort", slot!(OptText, codex_effort)).env("UPNEXT_CODEX_EFFORT").app(check::any).choices(&CODEX_EFFORTS),
+    // The same models as the API key's defaults, by Copilot's names. Copilot
+    // Free can only use "auto", which Settings offers.
+    Setting::new("copilot_model", slot!(OptText, copilot_model))
+        .env("UPNEXT_COPILOT_MODEL")
+        .default("claude-sonnet-5.5")
+        .app(check::no_spaces),
+    Setting::new("copilot_digest_model", slot!(OptText, copilot_digest_model))
+        .env("UPNEXT_COPILOT_DIGEST_MODEL")
+        .default("claude-haiku-5.5")
+        .app(check::no_spaces),
     Setting::new("anthropic_api_key", slot!(OptText, anthropic_api_key)).env("ANTHROPIC_API_KEY").app(check::anthropic_api_key).secret(),
     Setting::new("openai_key", slot!(OptText, openai_key)).env("OPENAI_API_KEY").app(check::openai_key).secret(),
     // The newest Luna, as on the ChatGPT plan, after a quality check.
@@ -234,6 +244,7 @@ pub static SETTINGS: &[Setting] = &[
     Setting::new("tls_key", slot!(OptPath, tls_key)).env("UPNEXT_TLS_KEY").app(check::any),
     Setting::new("claude_bin", slot!(Text, claude_bin)).env("UPNEXT_CLAUDE_BIN").default("claude"),
     Setting::new("codex_bin", slot!(Text, codex_bin)).env("UPNEXT_CODEX_BIN").default("codex"),
+    Setting::new("copilot_bin", slot!(Text, copilot_bin)).env("UPNEXT_COPILOT_BIN").default("copilot"),
     Setting::new("openai_key_url", slot!(Text, openai_key_url)).env("UPNEXT_OPENAI_URL").default(DEFAULT_OPENAI_KEY_URL),
     Setting::new("heroic_dir", slot!(OptPath, heroic_dir)).env("UPNEXT_HEROIC_DIR"),
     Setting::new("epic_manifests", slot!(OptPath, epic_manifests)).env("UPNEXT_EPIC_MANIFESTS"),
@@ -375,7 +386,7 @@ mod tests {
         assert_eq!(unique.len(), keys.len(), "no key twice");
         // The keys the app could set before the table, and the ones exports drop.
         let in_app: Vec<&str> = SETTINGS.iter().filter(|s| s.in_app).map(|s| s.key).collect();
-        assert_eq!(in_app.len(), 69);
+        assert_eq!(in_app.len(), 71);
         assert_eq!(
             secret_keys().collect::<Vec<_>>(),
             [

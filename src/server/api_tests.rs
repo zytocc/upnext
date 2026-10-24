@@ -1574,6 +1574,83 @@ async fn a_subscription_shows_its_plan_and_api_prices() {
     assert_eq!(prices["prices"]["models"]["claude-sonnet-5-5"]["input"], 2.0);
 }
 
+/// A fake `copilot`: a version, and a call that keeps what it was given
+/// (arguments, stdin, its folder) and prints the real success's events and
+/// usage file, or Copilot's signed-out message when `signed-out` exists in
+/// `dir`.
+#[cfg(unix)]
+fn fake_copilot(dir: &std::path::Path) -> String {
+    use std::os::unix::fs::PermissionsExt;
+    let d = dir.display();
+    let script = format!(
+        "#!/bin/sh\n[ \"$1\" = --version ] && {{ echo 'GitHub Copilot CLI 1.0.103.'; exit 0; }}\n\
+         if [ -f '{d}/signed-out' ]; then cat '{}' >&2; exit 1; fi\n\
+         printf '%s\\n' \"$@\" > '{d}/call-args'; cat > '{d}/call-stdin'; pwd > '{d}/call-dir'\n\
+         prev=; for a in \"$@\"; do [ \"$prev\" = --usage-output-file ] && cp '{}' \"$a\"; prev=$a; done\n\
+         cat '{}'\n",
+        crate::testutil::fixture_path("llm/copilot_cli_signed_out.txt").display(),
+        crate::testutil::fixture_path("llm/copilot_cli_usage.json").display(),
+        crate::testutil::fixture_path("llm/copilot_cli_success.jsonl").display(),
+    );
+    let bin = dir.join("copilot");
+    std::fs::write(&bin, script).unwrap();
+    std::fs::set_permissions(&bin, std::fs::Permissions::from_mode(0o755)).unwrap();
+    bin.to_string_lossy().into_owned()
+}
+
+/// On a GitHub Copilot plan: Settings sees the CLI, a call goes through
+/// `copilot` with the instructions, schema and prompt on stdin and every
+/// tool off, isn't charged, and a signed-out Copilot says to sign in.
+#[cfg(unix)]
+#[tokio::test]
+async fn a_copilot_plan_runs_through_the_copilot_cli() {
+    let app = test_app().await;
+    let dir = app._dir.path().to_path_buf();
+    let bin = fake_copilot(&dir);
+    let app = reconfigured(app, |cfg| {
+        cfg.llm_backend = "copilot-cli".into();
+        cfg.copilot_bin = bin;
+    });
+
+    let copilot = app.get("/api/llm/copilot").await;
+    assert_eq!((&copilot["installed"], &copilot["version"]), (&json!(true), &json!("GitHub Copilot CLI 1.0.103")), "{copilot}");
+    let ids: Vec<&str> = copilot["models"].as_array().unwrap().iter().map(|m| m["id"].as_str().unwrap()).collect();
+    assert!(ids.starts_with(&["auto", "claude-sonnet-5.5", "claude-haiku-5.5"]), "{ids:?}");
+    let settings = app.get("/api/settings").await;
+    assert_eq!(
+        (&settings["copilot_model"], &settings["copilot_digest_model"]),
+        (&json!("claude-sonnet-5.5"), &json!("claude-haiku-5.5")),
+        "Sonnet 5.5 for picks and Haiku 5.5 for summaries, as on an API key"
+    );
+    assert!(settings["llm_backends"].as_array().unwrap().contains(&json!("copilot-cli")));
+    assert!(settings["digest_backends"].as_array().unwrap().contains(&json!("copilot-cli")));
+    let (status, _) = app.call("PUT", "/api/settings", Some(json!({"copilot_model": "two words"}))).await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+
+    let (_, tested) = app.call("POST", "/api/llm/test", None).await;
+    assert_eq!(
+        (&tested["ok"], &tested["backend"], &tested["model"]),
+        (&json!(true), &json!("copilot-cli"), &json!("fake-model")),
+        "{tested}"
+    );
+    assert_eq!(tested["usage"]["input_tokens"], 1234);
+    assert_eq!(tested["cost_usd"], Value::Null, "a Copilot plan isn't charged per call");
+    let args = std::fs::read_to_string(dir.join("call-args")).unwrap();
+    let args: Vec<&str> = args.lines().collect();
+    assert!(args.windows(2).any(|w| w == ["--model", "claude-sonnet-5.5"]), "{args:?}");
+    assert!(args.contains(&"--available-tools=none") && !args.iter().any(|a| a.starts_with("--allow")), "{args:?}");
+    let stdin = std::fs::read_to_string(dir.join("call-stdin")).unwrap();
+    assert!(stdin.starts_with("You check that an API connection works."), "{stdin}");
+    assert!(stdin.contains("JSON Schema") && stdin.contains(r#"Reply with {"ok": true}."#), "{stdin}");
+    let call_dir = std::fs::read_to_string(dir.join("call-dir")).unwrap();
+    assert!(call_dir.contains("upnext-copilot-") && !std::path::Path::new(call_dir.trim()).exists(), "the call's folder is removed");
+
+    std::fs::write(dir.join("signed-out"), "").unwrap();
+    let (_, tested) = app.call("POST", "/api/llm/test", None).await;
+    assert_eq!(tested["ok"], false);
+    assert!(tested["error"].as_str().unwrap().contains("run `copilot login`"), "{tested}");
+}
+
 /// A fake `codex`: signed in with ChatGPT unless `signed-out` exists in
 /// `dir`, a real model catalog, and an exec that keeps what it was given
 /// (arguments, stdin, its folder and the two files in it) and prints the

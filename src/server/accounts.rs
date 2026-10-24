@@ -275,7 +275,7 @@ async fn ai_get(State(state): State<AppState>, Me(me): Me) -> ApiResult<Vec<AiAc
 
 #[derive(Debug, Deserialize, utoipa::ToSchema)]
 struct AiBody {
-    /// An `llm_backend`: `claude-cli`, `codex-cli`, `api-key`, `openai-key` or `openai`; null for the built-in one.
+    /// An `llm_backend`: `claude-cli`, `codex-cli`, `copilot-cli`, `api-key`, `openai-key` or `openai`; null for the built-in one.
     backend: Option<String>,
     /// AI settings and keys by name, as `PUT /settings` takes them (`model`, `anthropic_api_key`,
     /// `claude_oauth_token` and the rest); null or "" clears one.
@@ -344,7 +344,8 @@ fn sharing_and_players(state: &AppState, me: PlayerId, body: &AiBody) -> Result<
 #[utoipa::path(post, path = "/ai-accounts", tag = "ai",
     description = "Add an AI account for this player. A Claude Code CLI account other than this computer's needs its own \
         token (`claude_oauth_token`, from `claude setup-token`); a Codex CLI one signs in in its own folder \
-        (`CODEX_HOME=<data folder>/codex/<id> codex login`). A player with no AI account starts using it.",
+        (`CODEX_HOME=<data folder>/codex/<id> codex login`), and so does a Copilot CLI one \
+        (`COPILOT_HOME=<data folder>/copilot/<id> copilot login`). A player with no AI account starts using it.",
     request_body = AiBody,
     responses((status = 201, body = AiAccount),
         (status = 400, description = "An unknown backend or setting, a bad value, or a bad sharing or player"),

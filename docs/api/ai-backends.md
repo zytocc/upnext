@@ -8,6 +8,7 @@
 |---|---|---|
 | `claude-cli` (the default) | a Claude subscription, through the Claude Code CLI | below |
 | `codex-cli` | a ChatGPT subscription, through the Codex CLI | [Codex CLI](ai-codex.md) |
+| `copilot-cli` | a GitHub Copilot plan, through the Copilot CLI | [Copilot CLI](ai-copilot.md) |
 | `api-key` | an Anthropic API key, billed per call | below |
 | `openai-key` | an OpenAI API key, billed per call | [OpenAI API key](ai-openai-key.md) |
 | `openai` | any OpenAI-compatible server: a model at home or another provider | [Another provider](ai-openai-compatible.md) |
@@ -25,7 +26,7 @@ With the API key (`anthropic_api_key`, write-only, starting `sk-ant-`; `GET` giv
 Review summaries and tags, Second Chance's "Now" and hidden gem ratings can go to another backend, such as a Claude subscription for picks and a model at home for this bulk work. Picks, series guides, Help me decide and "It's too ___" stay on `llm_backend`.
 
 - `digest_backend` (`UPNEXT_DIGEST_LLM`): `same` (the default) or one of `llm_backends`. `GET` lists `digest_backends` (`same` first) and `digest_models`, the Claude models the summaries' backend offers (`haiku` with the API key).
-- A backend chosen here uses its own settings, as it does for picks (its address, key, thinking and effort), with its summaries model: `digest_model`, `codex_digest_model`, `openai_key_digest_model`, or `openai_digest_model` falling back to `openai_model`. So two different OpenAI-compatible servers aren't possible; one of them can be the OpenAI API key backend instead.
+- A backend chosen here uses its own settings, as it does for picks (its address, key, thinking and effort), with its summaries model: `digest_model`, `codex_digest_model`, `copilot_digest_model`, `openai_key_digest_model`, or `openai_digest_model` falling back to `openai_model`. So two different OpenAI-compatible servers aren't possible; one of them can be the OpenAI API key backend instead.
 - Elsewhere: `ai` in `GET /api/gems` and `GET /api/second-chances` is the summaries' backend's state. `GET /api/ai/estimates` gives each feature its `backend`. `GET /api/ai/plan` reads the picks' subscription, or the summaries' one when only summaries run on a subscription. Prices are read for both backends. `upnext doctor` adds a "Summaries backend" line, and `upnext seed generate` writes on the summaries' backend.
 
 ## POST /api/llm/test

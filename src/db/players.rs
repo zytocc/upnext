@@ -78,6 +78,8 @@ pub const AI_KEYS: &[&str] = &[
     "codex_model",
     "codex_digest_model",
     "codex_effort",
+    "copilot_model",
+    "copilot_digest_model",
     "openai_key_model",
     "openai_key_digest_model",
     "openai_key_effort",

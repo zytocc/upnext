@@ -10,10 +10,17 @@ None of these is a data source, so none has a credit in Settings › About.
 | Claude Code's release site | `downloads.claude.ai/claude-code-releases`: the manifest and the unmodified `claude` binary, only when you ask (`upnext install-claude`, or `UPNEXT_INSTALL_CLAUDE=1` in UpNext's container) | Claude Code's licence (below) |
 | Anthropic API | The Messages API, with your key | [Commercial Terms](https://www.anthropic.com/legal/commercial-terms), [Usage Policy](https://www.anthropic.com/legal/aup) |
 | ChatGPT, through your Codex CLI | `codex exec` as a subprocess, on your ChatGPT sign-in. UpNext never reads its credentials | [OpenAI Terms of Use](https://openai.com/policies/terms-of-use/), [Codex authentication](https://learn.chatgpt.com/docs/auth) |
+| GitHub Copilot, through your Copilot CLI | `copilot` with `--output-format json` as a subprocess, on your GitHub sign-in. UpNext never reads its credentials | [GitHub Terms of Service](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service) (section J, AI features), [Acceptable Use Policies](https://docs.github.com/en/site-policy/acceptable-use-policies/github-acceptable-use-policies), [Copilot CLI programmatic use](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-programmatic-reference) |
 | OpenAI API | Chat Completions, with your key | [Services Agreement](https://openai.com/policies/services-agreement/), [Usage policies](https://openai.com/policies/usage-policies/) |
 | OpenAI-compatible servers | Whatever you point UpNext at: Ollama, LM Studio, llama.cpp, vLLM, OpenRouter, and Settings' presets for Google Gemini, Groq, Mistral, DeepSeek and xAI | The server's and the model's own licences |
 
 With an API key, the key owner's terms and usage policy apply. With the Codex CLI, your credentials stay your own. OpenAI recommends API keys for automated workflows and has opened its plans to third-party tools with "Sign in with ChatGPT"; nothing was found against running your own signed-in CLI.
+
+## GitHub Copilot CLI
+
+GitHub documents running the Copilot CLI from scripts without a person at the terminal ("programmatic" use, with `--output-format json` for machine-readable output), and publishes an SDK for building the same runtime into other applications on the user's own Copilot subscription. The CLI's licence (its `LICENSE.md`) lets an application go further and ship unmodified copies of it, "as part of an application or service that provides material functionality beyond the Software itself". UpNext doesn't ship it: it runs the `copilot` you installed and signed in to, as a subprocess.
+
+For individual plans, section J of GitHub's Terms of Service (AI features) governs Copilot, and the Acceptable Use Policies forbid "excessive automated bulk activity". UpNext's calls are ones you start or schedule for your own library, a few for a lineup and one for each batch of review summaries, and every one counts against your plan's allowance like any other Copilot request. Copilot Business and Enterprise users are under their organization's agreement, and an organization can turn the CLI off. GitHub's name is used only to say which program runs.
 
 ## Claude Code
 

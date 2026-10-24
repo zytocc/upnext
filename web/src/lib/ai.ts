@@ -4,6 +4,7 @@ import type { AiAccount, AiKind } from '../types'
 export const BACKEND_LABEL: Record<string, string> = {
   'claude-cli': 'Claude subscription',
   'codex-cli': 'ChatGPT subscription',
+  'copilot-cli': 'GitHub Copilot',
   'api-key': 'Anthropic API key',
   'openai-key': 'OpenAI API key',
   openai: 'Another provider',

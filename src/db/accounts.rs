@@ -136,7 +136,7 @@ pub struct AiAccount {
     /// Whether the library's own AI work (summaries, series guides, hidden gems) runs on it.
     pub library: bool,
     /// The first account: the environment's AI settings and this
-    /// computer's signed-in Claude and Codex CLIs are its.
+    /// computer's signed-in Claude, Codex and Copilot CLIs are its.
     pub this_computer: bool,
 }
 

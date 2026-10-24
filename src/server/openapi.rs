@@ -43,6 +43,7 @@ Errors are `{\"error\": \"…\"}` with the status.";
         ai::llm_test,
         ai::llm_models,
         ai::llm_codex,
+        ai::llm_copilot,
         ai::llm_openai,
         library::collections,
         library::stats,

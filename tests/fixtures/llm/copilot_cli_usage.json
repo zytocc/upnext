@@ -1,0 +1,75 @@
+{
+  "totalPremiumRequestCost": 0,
+  "totalUserRequests": 1,
+  "totalNanoAiu": 0,
+  "aiCreditsStatus": "unavailable",
+  "totalApiDurationMs": 39,
+  "sessionStartTime": "2026-10-24T22:37:17.735Z",
+  "codeChanges": {
+    "linesAdded": 0,
+    "linesRemoved": 0,
+    "filesModifiedCount": 0,
+    "filesModified": []
+  },
+  "modelMetrics": {
+    "fake-model": {
+      "requests": {
+        "count": 1,
+        "cost": 0
+      },
+      "usage": {
+        "inputTokens": 1234,
+        "outputTokens": 56,
+        "cacheReadTokens": 1000,
+        "cacheWriteTokens": 0
+      },
+      "totalNanoAiu": 0,
+      "aiCreditsStatus": "unavailable"
+    }
+  },
+  "agentMetrics": {
+    "main": {
+      "totalApiDurationMs": 39,
+      "totalNanoAiu": 0,
+      "modelMetrics": {
+        "fake-model": {
+          "requests": {
+            "count": 1,
+            "cost": 0
+          },
+          "usage": {
+            "inputTokens": 1234,
+            "outputTokens": 56,
+            "cacheReadTokens": 1000,
+            "cacheWriteTokens": 0
+          },
+          "totalNanoAiu": 0
+        }
+      }
+    }
+  },
+  "providerModelMetrics": [
+    {
+      "provider": null,
+      "modelId": "fake-model",
+      "metrics": {
+        "requests": {
+          "count": 1,
+          "cost": 0
+        },
+        "usage": {
+          "inputTokens": 1234,
+          "outputTokens": 56,
+          "cacheReadTokens": 1000,
+          "cacheWriteTokens": 0
+        },
+        "totalNanoAiu": 0,
+        "aiCreditsStatus": "unavailable"
+      },
+      "modelDisplayName": "fake-model"
+    }
+  ],
+  "currentModel": "fake-model",
+  "lastCallInputTokens": 1234,
+  "lastCallOutputTokens": 56
+}

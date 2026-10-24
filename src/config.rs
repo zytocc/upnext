@@ -105,7 +105,7 @@ pub struct Config {
     /// Scratch space: the working directory of `claude -p` (`UPNEXT_CACHE_DIR`).
     pub cache_dir: PathBuf,
     /// Which LLM backend to use: `claude-cli` (default), `codex-cli`,
-    /// `api-key`, `openai-key` or `openai`.
+    /// `copilot-cli`, `api-key`, `openai-key` or `openai`.
     pub llm_backend: String,
     /// Which backend writes review summaries and the other bulk work
     /// (second chances, hidden gems): "same" (as `llm_backend`, the
@@ -122,6 +122,12 @@ pub struct Config {
     pub codex_digest_model: Option<String>,
     /// Reasoning effort on `codex-cli`; `None` is Codex's default for the model.
     pub codex_effort: Option<String>,
+    /// Path to the `copilot` binary (default: `copilot`, resolved via PATH).
+    pub copilot_bin: String,
+    /// Model for picks, series guides and Help me decide on `copilot-cli`.
+    pub copilot_model: Option<String>,
+    /// Model for review summaries on `copilot-cli` (default: `copilot_model`).
+    pub copilot_digest_model: Option<String>,
     /// Heroic config directory override (auto-detected when unset).
     pub heroic_dir: Option<PathBuf>,
     /// The Epic Games Launcher's manifests folder (on Windows, found in
@@ -272,6 +278,9 @@ pub struct Config {
     /// The Codex CLI's home for an AI account other than this computer's
     /// (`CODEX_HOME`), where its own `codex login` is kept.
     pub codex_home: Option<PathBuf>,
+    /// The Copilot CLI's home for such an account (`COPILOT_HOME`), where
+    /// its own `copilot login` is kept.
+    pub copilot_home: Option<PathBuf>,
     /// These settings before the database was laid over them, so a job that
     /// runs with the library's can read them again as one player has them.
     pub before_db: Option<std::sync::Arc<Config>>,
@@ -345,10 +354,10 @@ pub const LINUX_MODES: [&str; 3] = ["auto", "on", "off"];
 pub const THINKING_MODES: [&str; 3] = ["auto", "off", "on"];
 
 /// Values accepted for `llm_backend`.
-pub const LLM_BACKENDS: [&str; 5] = ["claude-cli", "codex-cli", "api-key", "openai-key", "openai"];
+pub const LLM_BACKENDS: [&str; 6] = ["claude-cli", "codex-cli", "copilot-cli", "api-key", "openai-key", "openai"];
 
 /// Values accepted for `digest_backend`: "same" as picks, or a backend of its own.
-pub const DIGEST_BACKENDS: [&str; 6] = ["same", "claude-cli", "codex-cli", "api-key", "openai-key", "openai"];
+pub const DIGEST_BACKENDS: [&str; 7] = ["same", "claude-cli", "codex-cli", "copilot-cli", "api-key", "openai-key", "openai"];
 
 /// Values accepted for `codex_effort`, least to most. A model takes some of
 /// them (`codex debug models` lists which).
@@ -414,6 +423,7 @@ impl std::fmt::Debug for Config {
             .field("ai_account", &self.ai_account)
             .field("no_ai_account", &self.no_ai_account)
             .field("codex_home", &self.codex_home)
+            .field("copilot_home", &self.copilot_home)
             .field("before_db", &self.before_db)
             .field("cli_player", &self.cli_player)
             .field("sources", &self.sources)
@@ -521,6 +531,11 @@ impl Config {
         find_program(&self.codex_bin).map(|(p, _)| p.display().to_string()).unwrap_or_else(|| self.codex_bin.clone())
     }
 
+    /// The `copilot` program to run, found the same way.
+    pub fn copilot_program(&self) -> String {
+        find_program(&self.copilot_bin).map(|(p, _)| p.display().to_string()).unwrap_or_else(|| self.copilot_bin.clone())
+    }
+
     /// The model to ask for picks, series guides and "Help me decide", in the
     /// active backend's terms (a Claude alias, or the other server's model name).
     pub fn pick_model(&self) -> Option<String> {
@@ -528,6 +543,7 @@ impl Config {
             "openai" => self.openai_model.clone(),
             "openai-key" => self.openai_key_model.clone(),
             "codex-cli" => self.codex_model.clone(),
+            "copilot-cli" => self.copilot_model.clone(),
             "api-key" => self.chosen("model", &self.model).or_else(|| Some(API_KEY_PICK_MODEL.into())),
             _ => self.model.clone(),
         }
@@ -573,6 +589,7 @@ impl Config {
             "openai" => self.openai_digest_model.clone().or_else(|| self.openai_model.clone()),
             "openai-key" => self.openai_key_digest_model.clone().or_else(|| self.openai_key_model.clone()),
             "codex-cli" => self.codex_digest_model.clone().or_else(|| self.codex_model.clone()),
+            "copilot-cli" => self.copilot_digest_model.clone().or_else(|| self.copilot_model.clone()),
             "api-key" => self.chosen("digest_model", &self.digest_model).or_else(|| Some(API_KEY_SUMMARY_MODEL.into())),
             _ => self.digest_model.clone(),
         }

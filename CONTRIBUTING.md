@@ -49,7 +49,7 @@ Picks and the other AI features call a model. For development you don't need one
 
 - `upnext prompt "a short chill game"` prints the exact prompt a pick would send, without sending it.
 - Point UpNext at any OpenAI-compatible server: `UPNEXT_LLM=openai UPNEXT_OPENAI_BASE_URL=http://127.0.0.1:11434/v1 UPNEXT_OPENAI_MODEL=<model>` for Ollama, or the fake model the end-to-end test uses (`node web/e2e/fake-llm.mjs`, which answers on port 8799).
-- To make real calls, use your own Claude Code CLI, Codex CLI or API key, as [AI](docs/ai.md) describes.
+- To make real calls, use your own Claude Code CLI, Codex CLI, Copilot CLI or API key, as [AI](docs/ai.md) describes.
 
 ## Conventions
 

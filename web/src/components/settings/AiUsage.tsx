@@ -103,7 +103,7 @@ function Dollars() {
               )}
               {!v.charged && (
                 <p className="m-0">
-                  Your {v.backend === 'codex-cli' ? 'ChatGPT' : 'Claude'} plan isn't charged per call: the dollars are what the same calls would cost
+                  Your {v.backend === 'codex-cli' ? 'ChatGPT' : v.backend === 'copilot-cli' ? 'Copilot' : 'Claude'} plan isn't charged per call: the dollars are what the same calls would cost
                   on the API, to compare, not money spent.
                 </p>
               )}

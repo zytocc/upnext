@@ -24,7 +24,7 @@ The compose file publishes the port on `127.0.0.1` only. Drop the `127.0.0.1:` t
 
 ## The AI
 
-The image has no Claude or Codex CLI. An API key, or an OpenAI-compatible server such as Ollama on the host at `http://host.docker.internal:11434/v1` (the compose file adds that name), works as it is.
+The image has no Claude, Codex or Copilot CLI. An API key, or an OpenAI-compatible server such as Ollama on the host at `http://host.docker.internal:11434/v1` (the compose file adds that name), works as it is.
 
 **Your Claude subscription.** Claude Code's licence doesn't allow passing it on, so the image doesn't carry it. With `UPNEXT_INSTALL_CLAUDE: "1"` the container installs it from Anthropic into `/data` when it starts and finds none (about 250 MB, checked against Anthropic's manifest), and `docker exec upnext upnext install-claude` installs it by hand. The version is whatever Anthropic's stable channel names at the time, and it updates itself as it does on a desktop, so the Claude Code in the container can change without a new image or a line in UpNext's log. A restart doesn't download it again.
 

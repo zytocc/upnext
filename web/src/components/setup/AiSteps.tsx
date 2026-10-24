@@ -12,7 +12,7 @@ import { useToast } from '../useToast'
 import { claudeInstall, flatpakClaude } from '../../lib/setup'
 import { CopyLines, StepButtons, StepHead, type StepProps } from './parts'
 
-const SUBSCRIPTION = ['claude-cli', 'codex-cli']
+const SUBSCRIPTION = ['claude-cli', 'codex-cli', 'copilot-cli']
 
 /** The wizard's "in parts": games a day for a big first run. A daily
  *  schedule runs every 24 hours from when it's set, so it says "a day",

@@ -113,7 +113,7 @@ fn error_message(body: &str) -> String {
 /// thinking in the reply writes `<think>…</think>` first, and the thinking
 /// often mentions a brace ("the schema wants {picks, spares}"), so the
 /// answer is looked for after it.
-fn extract_json(text: &str) -> Option<Value> {
+pub(super) fn extract_json(text: &str) -> Option<Value> {
     const THOUGHT: &str = "</think>";
     let t = text.rfind(THOUGHT).map_or(text, |i| &text[i + THOUGHT.len()..]).trim();
     if let Ok(v) = serde_json::from_str(t) {

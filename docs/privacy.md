@@ -11,7 +11,7 @@ Everything UpNext knows is in its database on your computer: `~/.local/share/upn
 | GOG | Sync, once you connect your account; fetching details and series covers, with no account | Your GOG sign-in, for sync; GOG product ids, and series games' store-page names to find their ids |
 | Epic Games | Sync, once you sign in to Epic | Your Epic sign-in; it answers with your games, their store details and your playtime |
 | Wikidata, PCGamingWiki | Fetching details and series | Game names and Steam app ids |
-| libretro thumbnails | Fetching details, for games added from an emulator | A console's name |
+| libretro | Fetching details | Console names |
 | IGDB, RAWG | Fetching details, with your own credentials | Your credentials, game names |
 | HowLongToBeat | Only when you turn it on | Game names |
 | Your identity provider | Only if you set one up, when someone signs in with it | Your browser goes to it; UpNext reads its public settings and keys and sends it the sign-in's code with UpNext's client id and secret; it answers with who signed in |
@@ -31,7 +31,7 @@ UpNext sends the AI only what the task needs, and never your keys, SteamID, acco
 - **Second chances**: an abandoned game, what you said about why you stopped, and player reviews written since.
 - **Hidden gems**: unplayed games with their details, tags, publishers and review summaries.
 
-With the Claude Code or Codex CLI, the CLI adds its own instructions to each call, as it does for any use. With an API key, the call goes to Anthropic or OpenAI under your key. With a local server, nothing leaves your machine. `upnext prompt "…"` prints a pick's exact prompt without sending it.
+With the Claude Code, Codex or Copilot CLI, the CLI adds its own instructions to each call, as it does for any use. Copilot's index of past sessions also lists UpNext's calls. With an API key, the call goes to Anthropic or OpenAI under your key. With a local server, nothing leaves your machine. `upnext prompt "…"` prints a pick's exact prompt without sending it.
 
 ## On your network
 

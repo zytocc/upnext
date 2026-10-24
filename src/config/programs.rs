@@ -1,6 +1,7 @@
 //! Where the AI CLIs and the programs they need run from: as set when the
 //! setting is a path, else on `PATH`, else in the folders their installers
-//! use. Configuration names the programs (`claude_bin`, `codex_bin`);
+//! use. Configuration names the programs (`claude_bin`, `codex_bin`,
+//! `copilot_bin`);
 //! `Config::claude_program`, `process.rs` and the AI CLIs find them here.
 
 use std::path::PathBuf;
@@ -50,15 +51,18 @@ fn usual_folders(homes: &[PathBuf], windows: Vec<PathBuf>) -> Vec<PathBuf> {
 }
 
 /// The folders Windows installers put the AI CLIs and Node.js in, from the
-/// environment (`var`): npm's global folder (`claude.cmd`, `codex.cmd`), the
-/// Codex app's command line, and Node.js, whose `node.exe` npm's scripts
-/// need. A program started outside a terminal may not have them on its
-/// `PATH`, and one started before they were installed never does.
+/// environment (`var`): npm's global folder (`claude.cmd`, `codex.cmd`,
+/// `copilot.cmd`), the Codex app's command line, WinGet's links
+/// (`copilot.exe` from `winget install GitHub.Copilot`), and Node.js, whose
+/// `node.exe` npm's scripts need. A program started outside a terminal may
+/// not have them on its `PATH`, and one started before they were installed
+/// never does.
 fn windows_folders(var: impl Fn(&str) -> Option<std::ffi::OsString>) -> Vec<PathBuf> {
     let under = |name: &str, rel: &[&str]| var(name).map(|v| rel.iter().fold(PathBuf::from(v), |p, r| p.join(r)));
     [
         under("APPDATA", &["npm"]),
         under("LOCALAPPDATA", &["Programs", "OpenAI", "Codex", "bin"]),
+        under("LOCALAPPDATA", &["Microsoft", "WinGet", "Links"]),
         under("ProgramFiles", &["nodejs"]),
         under("ProgramFiles(x86)", &["nodejs"]),
     ]
@@ -94,8 +98,8 @@ mod tests {
     use super::*;
     use crate::config::Config;
 
-    /// npm's folder, the Codex app's and Node.js's, wherever Windows puts
-    /// them for this user.
+    /// npm's folder, the Codex app's, WinGet's links and Node.js's,
+    /// wherever Windows puts them for this user.
     #[test]
     fn windows_folders_come_from_the_environment() {
         let env = |name: &str| {
@@ -112,6 +116,7 @@ mod tests {
             [
                 PathBuf::from("C:/Users/you/AppData/Roaming").join("npm"),
                 PathBuf::from("C:/Users/you/AppData/Local").join("Programs").join("OpenAI").join("Codex").join("bin"),
+                PathBuf::from("C:/Users/you/AppData/Local").join("Microsoft").join("WinGet").join("Links"),
                 PathBuf::from("C:/Program Files").join("nodejs"),
             ]
         );

@@ -16,6 +16,7 @@ pub fn routes() -> Router<AppState> {
         .route("/llm/test", post(llm_test))
         .route("/llm/models", get(llm_models))
         .route("/llm/codex", get(llm_codex))
+        .route("/llm/copilot", get(llm_copilot))
         .route("/llm/openai", get(llm_openai))
         .route("/ai/usage", get(ai_usage_get))
         .route("/ai/estimates", get(ai_estimates_get))
@@ -66,6 +67,27 @@ async fn llm_codex(State(state): State<AppState>, Me(me): Me) -> Json<Value> {
         "models": models,
         "models_from": models_from,
         "models_error": models_error,
+    }))
+}
+
+/// The GitHub Copilot CLI for Settings: whether it runs here, its version,
+/// and the models Settings offers. Whether it's signed in shows on Test:
+/// the CLI has no command that says without a call.
+#[utoipa::path(get, path = "/llm/copilot", tag = "ai",
+    description = "The GitHub Copilot CLI for Settings: whether it runs here, its version, and the models Settings offers.",
+    responses((status = 200, body = Object, description = "`{installed, version, error, models: [{id, name, description}]}`")))]
+async fn llm_copilot(State(state): State<AppState>, Me(me): Me) -> Json<Value> {
+    use crate::llm::copilot_cli;
+    let cfg = state.cfg_for(me);
+    let (version, error) = match copilot_cli::version(&cfg.copilot_program(), cfg.copilot_home.as_deref()).await {
+        Ok(v) => (Some(v), None),
+        Err(e) => (None, Some(e)),
+    };
+    Json(json!({
+        "installed": version.is_some(),
+        "version": version,
+        "error": error,
+        "models": copilot_cli::models(),
     }))
 }
 

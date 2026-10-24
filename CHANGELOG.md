@@ -7,6 +7,7 @@ All notable changes to UpNext are listed here. The format follows [Keep a Change
 ### Added
 
 - Library › Add a game adds a game from no store UpNext reads: a game in an emulator, one played only with a mod, a VR game from a headset's own store. Give it a name and, if you like, where it's from ("RPCS3", "Meta Quest"), a cover link, a launcher's Play link, hours played and the last time played. It's looked up by name like any non-Steam game, and with no Steam match it gets its genres and year from Wikidata and, when where it's from names an emulator or console, its box art from libretro's thumbnails, with no keys. The game sheet can change or remove it, and "Not this game" drops a wrong match found by name. The AI sees where it's from among its stores. Thanks to avi12 for asking.
+- A GitHub Copilot plan can run the AI, through GitHub's own Copilot CLI (`winget install GitHub.Copilot` on Windows, `npm install -g @github/copilot` anywhere, then `copilot login`). Choose "GitHub Copilot" in Settings › Picks. Picks default to Claude Sonnet 5.5 and summaries to Claude Haiku 5.5; Copilot Free users choose Auto. Each call turns off Copilot's tools, MCP servers and custom instructions, and the session folder Copilot keeps for it is removed afterwards.
 
 ### Changed
 

@@ -5,6 +5,7 @@ import type {
   Routines,
   LlmModels,
   CodexStatus,
+  CopilotStatus,
   OpenAiKeyStatus,
   Config,
   EnrichOptions,
@@ -426,6 +427,7 @@ export const api = {
     request<LlmTestResult>(`/api/v1/llm/test${purpose ? `?purpose=${purpose}` : ''}`, { method: 'POST' }),
   llmModels: () => request<LlmModels>('/api/v1/llm/models'),
   llmCodex: () => request<CodexStatus>('/api/v1/llm/codex'),
+  llmCopilot: () => request<CopilotStatus>('/api/v1/llm/copilot'),
   llmOpenAi: () => request<OpenAiKeyStatus>('/api/v1/llm/openai'),
 
   /** What the AI used over the last `days` days: totals, and by day, kind and model. */

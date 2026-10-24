@@ -450,6 +450,74 @@
         ]
       }
     },
+    "/llm/copilot": {
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "description": "The GitHub Copilot CLI for Settings: whether it runs here, its version, and the models Settings offers.",
+        "operationId": "llm_copilot",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UpNextPlayer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "`{installed, version, error, models: [{id, name, description}]}`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "From another device: no token, or one that isn't valid here",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Refused: the token's scope doesn't allow it, a cross-site request, or a token over plain HTTP",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests with this token (about 10 a second); see Retry-After",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "token": [
+              "read"
+            ]
+          },
+          {
+            "device": [
+              "full"
+            ]
+          }
+        ]
+      }
+    },
     "/llm/openai": {
       "get": {
         "tags": [
@@ -13715,7 +13783,7 @@
         "tags": [
           "ai"
         ],
-        "description": "Add an AI account for this player. A Claude Code CLI account other than this computer's needs its own token (`claude_oauth_token`, from `claude setup-token`); a Codex CLI one signs in in its own folder (`CODEX_HOME=<data folder>/codex/<id> codex login`). A player with no AI account starts using it.",
+        "description": "Add an AI account for this player. A Claude Code CLI account other than this computer's needs its own token (`claude_oauth_token`, from `claude setup-token`); a Codex CLI one signs in in its own folder (`CODEX_HOME=<data folder>/codex/<id> codex login`), and so does a Copilot CLI one (`COPILOT_HOME=<data folder>/copilot/<id> copilot login`). A player with no AI account starts using it.",
         "operationId": "ai_add",
         "parameters": [
           {
@@ -14389,7 +14457,7 @@
           },
           "this_computer": {
             "type": "boolean",
-            "description": "The first account: the environment's AI settings and this\ncomputer's signed-in Claude and Codex CLIs are its."
+            "description": "The first account: the environment's AI settings and this\ncomputer's signed-in Claude, Codex and Copilot CLIs are its."
           }
         }
       },
@@ -14401,7 +14469,7 @@
               "string",
               "null"
             ],
-            "description": "An `llm_backend`: `claude-cli`, `codex-cli`, `api-key`, `openai-key` or `openai`; null for the built-in one."
+            "description": "An `llm_backend`: `claude-cli`, `codex-cli`, `copilot-cli`, `api-key`, `openai-key` or `openai`; null for the built-in one."
           },
           "settings": {
             "type": "object",
@@ -20335,7 +20403,7 @@
         "properties": {
           "backend": {
             "type": "string",
-            "description": "`claude-cli`, `codex-cli`, `api-key`, `openai-key` or `openai`."
+            "description": "`claude-cli`, `codex-cli`, `copilot-cli`, `api-key`, `openai-key` or `openai`."
           },
           "available": {
             "type": "boolean",

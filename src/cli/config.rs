@@ -54,7 +54,7 @@ pub fn unset(cfg: &Config, key: &str) -> Result<()> {
 
 /// Where `doctor` says it looked for the AI CLIs on Windows, besides `PATH`
 /// (`config::find_program`).
-const WINDOWS_FOLDERS: &str = r"in %USERPROFILE%\.local\bin, npm's %APPDATA%\npm or the Codex app's folder";
+const WINDOWS_FOLDERS: &str = r"in %USERPROFILE%\.local\bin, npm's %APPDATA%\npm, the Codex app's folder or WinGet's links";
 
 pub async fn doctor(cfg: &Config) -> Result<()> {
     let cfg = if cfg.db_path.is_file() { cfg.clone().with_db(&Db::open(&cfg.db_path, cfg.sampled_minutes)?)? } else { cfg.clone() };
@@ -182,7 +182,7 @@ fn paths(cfg: &Config) {
         None if crate::server::ui_built_in() => println!("{:<22}{}", "web UI", green("built into the binary")),
         None => println!("{:<22}{}", "web UI", red("not built: cd web && npm ci && npm run build")),
     }
-    for (label, bin) in [("claude CLI", &cfg.claude_bin), ("codex CLI", &cfg.codex_bin)] {
+    for (label, bin) in [("claude CLI", &cfg.claude_bin), ("codex CLI", &cfg.codex_bin), ("copilot CLI", &cfg.copilot_bin)] {
         match config::find_program(bin) {
             Some((p, how)) => {
                 let how = match how {

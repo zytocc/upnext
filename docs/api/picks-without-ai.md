@@ -2,7 +2,7 @@
 
 [API index](../API.md) · [Picks](picks.md) · [Lineups](lineups.md)
 
-With no AI set up (the chosen backend's own check fails: no `claude` or `codex`, no key, no server address or model), or with `"without_ai": true`, `POST /api/picks` makes the lineup from UpNext's own ranking, the one that orders the AI's candidate list, with no AI call. `upnext pick --without-ai` does the same in a terminal, and so does `upnext pick` with no AI set up.
+With no AI set up (the chosen backend's own check fails: no `claude`, `codex` or `copilot`, no key, no server address or model), or with `"without_ai": true`, `POST /api/picks` makes the lineup from UpNext's own ranking, the one that orders the AI's candidate list, with no AI call. `upnext pick --without-ai` does the same in a terminal, and so does `upnext pick` with no AI set up.
 
 The lineup is the same shape, with:
 

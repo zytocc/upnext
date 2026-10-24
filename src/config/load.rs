@@ -295,6 +295,7 @@ impl Config {
                 self.unset(key);
             }
             self.codex_home = view.ai_account.map(|id| self.data_dir.join("codex").join(id.to_string()));
+            self.copilot_home = view.ai_account.map(|id| self.data_dir.join("copilot").join(id.to_string()));
         }
         for s in SETTINGS.iter().filter(|s| s.in_app) {
             // A verdicts service saved before the https rule is held to it:

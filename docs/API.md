@@ -54,7 +54,7 @@ The UpNext server answers on `http://127.0.0.1:8787` unless set otherwise. The U
 ## AI
 
 - [AI backends](api/ai-backends.md): Claude models, a separate AI for summaries, the test call
-- [ChatGPT through the Codex CLI](api/ai-codex.md) · [OpenAI API key](api/ai-openai-key.md) · [Another provider](api/ai-openai-compatible.md)
+- [ChatGPT through the Codex CLI](api/ai-codex.md) · [GitHub Copilot through the Copilot CLI](api/ai-copilot.md) · [OpenAI API key](api/ai-openai-key.md) · [Another provider](api/ai-openai-compatible.md)
 - [AI usage](api/ai-usage.md) · [AI estimates](api/ai-estimates.md) · [Prices and plans](api/ai-prices.md)
 
 ## Settings, setup and players

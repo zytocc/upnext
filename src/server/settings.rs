@@ -123,6 +123,8 @@ fn settings_json(state: &AppState, me: PlayerId) -> Result<Value, ApiError> {
     v["digest_models"] = claude_models(cfg.summary_backend());
     v["codex_effort"] = json!(cfg.codex_effort);
     v["codex_efforts"] = json!(crate::config::CODEX_EFFORTS);
+    v["copilot_model"] = json!(cfg.copilot_model);
+    v["copilot_digest_model"] = json!(cfg.copilot_digest_model);
     v["shelve_after_days"] = json!(cfg.shelve_after_days);
     v["abandon_after_days"] = json!(cfg.abandon_after_days);
     v["staple_hours"] = json!(cfg.staple_hours);

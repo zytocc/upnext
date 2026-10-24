@@ -123,6 +123,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/llm/copilot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The GitHub Copilot CLI for Settings: whether it runs here, its version, and the models Settings offers. */
+        get: operations["llm_copilot"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/llm/openai": {
         parameters: {
             query?: never;
@@ -2416,7 +2433,7 @@ export interface paths {
         /** @description Every AI account this player owns or is offered, never its keys (`keys_set` names the ones it holds), with the one they use (`in_use`), the library's (`library`) and this computer's (`this_computer`, the one the environment's AI settings and the signed-in CLIs are). */
         get: operations["ai_get"];
         put?: never;
-        /** @description Add an AI account for this player. A Claude Code CLI account other than this computer's needs its own token (`claude_oauth_token`, from `claude setup-token`); a Codex CLI one signs in in its own folder (`CODEX_HOME=<data folder>/codex/<id> codex login`). A player with no AI account starts using it. */
+        /** @description Add an AI account for this player. A Claude Code CLI account other than this computer's needs its own token (`claude_oauth_token`, from `claude setup-token`); a Codex CLI one signs in in its own folder (`CODEX_HOME=<data folder>/codex/<id> codex login`), and so does a Copilot CLI one (`COPILOT_HOME=<data folder>/copilot/<id> copilot login`). A player with no AI account starts using it. */
         post: operations["ai_add"];
         delete?: never;
         options?: never;
@@ -2595,12 +2612,12 @@ export interface components {
             library: boolean;
             /**
              * @description The first account: the environment's AI settings and this
-             *     computer's signed-in Claude and Codex CLIs are its.
+             *     computer's signed-in Claude, Codex and Copilot CLIs are its.
              */
             this_computer: boolean;
         };
         AiBody: {
-            /** @description An `llm_backend`: `claude-cli`, `codex-cli`, `api-key`, `openai-key` or `openai`; null for the built-in one. */
+            /** @description An `llm_backend`: `claude-cli`, `codex-cli`, `copilot-cli`, `api-key`, `openai-key` or `openai`; null for the built-in one. */
             backend?: string | null;
             /**
              * @description AI settings and keys by name, as `PUT /settings` takes them (`model`, `anthropic_api_key`,
@@ -4766,7 +4783,7 @@ export interface components {
             background: components["schemas"]["SetupBackground"];
         };
         SetupAi: {
-            /** @description `claude-cli`, `codex-cli`, `api-key`, `openai-key` or `openai`. */
+            /** @description `claude-cli`, `codex-cli`, `copilot-cli`, `api-key`, `openai-key` or `openai`. */
             backend: string;
             /**
              * @description The backend can run (the CLI starts, a key is set); no call is made.
@@ -5834,6 +5851,56 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description `{installed, version, login, error, families: [{id, model}], models, models_from: "codex" | "built_in", models_error}` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description From another device: no token, or one that isn't valid here */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Refused: the token's scope doesn't allow it, a cross-site request, or a token over plain HTTP */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Too many requests with this token (about 10 a second); see Retry-After */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    llm_copilot: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The player to answer for, by id, when no token bound to a player says it. An unknown id is a 400; a player with a PIN is a 403 (a script acts for them with a token bound to them), as is another player than the token's own. */
+                "UpNext-Player"?: components["parameters"]["UpNextPlayer"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `{installed, version, error, models: [{id, name, description}]}` */
             200: {
                 headers: {
                     [name: string]: unknown;
