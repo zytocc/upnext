@@ -27,7 +27,7 @@ cargo build --release --locked --bins
 powershell -ExecutionPolicy Bypass -File contrib\windows\build-msi.ps1
 ```
 
-`-ExecutionPolicy Bypass` runs this one script without changing the machine's policy. The MSI is `target\wix\upnext-x86_64-pc-windows-msvc.msi`, with Cargo.toml's version. `-Version 0.1.1` builds one with a higher version, to test an upgrade.
+`-ExecutionPolicy Bypass` runs this one script without changing the machine's policy. The MSI is `target\wix\upnext-x86_64-pc-windows-msvc.msi`, with Cargo.toml's version. `-Version 0.99.0` builds one with a higher version, to test an upgrade.
 
 ## Checking an MSI
 

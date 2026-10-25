@@ -1,0 +1,1 @@
+Add a game from no store by hand, such as one in an emulator, and run the AI with a GitHub Copilot plan. Many fixes to picks, syncs and the Lists page.
