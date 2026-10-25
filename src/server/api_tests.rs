@@ -1272,6 +1272,7 @@ async fn sync_sources_say_what_blocks_them() {
         ("epic", json!("not signed in, and no Epic Games Launcher here")),
         ("ea", json!("no EA app games installed here")),
         ("ubisoft", json!("no Ubisoft Connect games installed here")),
+        ("xbox", json!("no Xbox app games installed here")),
         ("galaxy", json!("no path set")),
     ]
     .into_iter()

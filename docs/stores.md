@@ -39,7 +39,7 @@ On Linux, Heroic brings Epic games. Without it, sign in to Epic in Settings (or 
 
 ## Games added by hand
 
-The EA app, Ubisoft Connect, Battle.net and Xbox have no sign-in UpNext can use. On Windows, the games the EA app and Ubisoft Connect installed are read from the registry, and GOG Galaxy's plugins bring the rest if you use Galaxy. Otherwise, Settings › Accounts › Games added by hand takes a list of titles, one a line, for each of those stores.
+The EA app, Ubisoft Connect, Battle.net and Xbox have no sign-in UpNext can use. On Windows, the games the EA app, Ubisoft Connect and the Xbox app (Game Pass too) installed are read, and GOG Galaxy's plugins bring the rest. Otherwise, Settings › Accounts › Games added by hand takes a list of titles, one a line, for each of those stores. Xbox app games start from UpNext's app window, not a browser.
 
 A game from no store, such as one in an emulator, one played with a mod or a VR game, goes in with Library › Add a game: its name, where it's from ("RPCS3"), and if you like a cover link, a launcher link for Play, hours and the last time played. It's looked up by name like the rest, and an emulator or console's name finds its box art on libretro.
 

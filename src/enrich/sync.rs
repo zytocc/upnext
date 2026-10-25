@@ -10,6 +10,7 @@ mod gog;
 mod heroic;
 mod steam;
 mod ubisoft;
+mod xbox;
 
 use super::{Clients, Progress, ProgressSink};
 use crate::config::Config;
@@ -181,14 +182,15 @@ pub fn libraries() -> Vec<Box<dyn Library>> {
         Box::new(epic::Epic),
         Box::new(ea::EaApp),
         Box::new(ubisoft::UbisoftConnect),
+        Box::new(xbox::XboxApp),
         Box::new(galaxy::Galaxy),
     ]
 }
 
 /// For a launcher whose files list installed games only (the Epic Games
-/// Launcher without a sign-in, the EA app, Ubisoft Connect): `installed`,
-/// with the games it brought in before and doesn't list now added back as
-/// not installed. Uninstalling a game doesn't give it back to the store, so
+/// Launcher without a sign-in, the EA app, Ubisoft Connect, the Xbox app):
+/// `installed`, with the games it brought in before and doesn't list now
+/// added back as not installed. Uninstalling a game doesn't give it back to the store, so
 /// it stays in the library; hiding it is the way to take it out.
 pub(crate) fn with_uninstalled(
     db: &Db,

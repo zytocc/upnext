@@ -54,12 +54,22 @@ async fn a_fresh_install_goes_to_the_wizard_and_sees_what_is_missing() {
     assert_eq!(stores["gog"]["connected"], false);
     assert_eq!(stores["galaxy"], json!({ "path": null, "exists": false }));
     assert_eq!((stores["ea"].clone(), stores["ubisoft"].clone()), (json!({ "installed": 0 }), json!({ "installed": 0 })));
+    assert_eq!(stores["xbox"], json!({ "installed": 0 }));
     assert_eq!(stores["epic"], json!({ "connected": false, "display_name": null, "launcher_dir": null, "installed": null }));
     let blocked: Vec<(&str, bool)> =
         stores["libraries"].as_array().unwrap().iter().map(|l| (l["id"].as_str().unwrap(), l["blocked"].is_string())).collect();
     assert_eq!(
         blocked,
-        [("steam", false), ("heroic", false), ("gog", true), ("epic", true), ("ea", true), ("ubisoft", true), ("galaxy", true)],
+        [
+            ("steam", false),
+            ("heroic", false),
+            ("gog", true),
+            ("epic", true),
+            ("ea", true),
+            ("ubisoft", true),
+            ("xbox", true),
+            ("galaxy", true)
+        ],
         "{}",
         stores["libraries"]
     );

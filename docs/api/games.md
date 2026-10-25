@@ -16,9 +16,10 @@ Games come from several libraries and are keyed by a stable internal integer `id
 | epic | epic | Epic app_name | `com.epicgames.launcher://apps/…?action=launch&silent=true` | yes (Epic account) |
 | origin | origin | EA content id | none | no |
 | uplay | uplay | Ubisoft game id | `uplay://launch/{id}/0` | no |
+| xboxone | xboxone | Microsoft Store id, in lower case | `shell:AppsFolder\{family}!{app}` | no |
 | origin, uplay, battlenet, xboxone | manual | the title's key | none | no |
 
-Fetching details matches non-Steam games by name against the Steam store, so they still get genres, tags and reviews; `appid` is then the matched appid and `steam_matched` is true. With no match, `appid` is null and only the launcher's own details (art, description, genres) are there. The same `(source, source_id)` seen from two launchers (Steam natively and through Galaxy, say) is one row, and the native launcher wins. [More stores](more-stores.md) has Epic, the EA app, Ubisoft Connect and games added by hand.
+Fetching details matches non-Steam games by name against the Steam store, so they still get genres, tags and reviews; `appid` is then the matched appid and `steam_matched` is true. With no match, `appid` is null and only the launcher's own details (art, description, genres) are there. The same `(source, source_id)` seen from two launchers (Steam natively and through Galaxy, say) is one row, and the native launcher wins. [More stores](more-stores.md) has Epic, the EA app, Ubisoft Connect, the Xbox app and games added by hand.
 
 ## The GameView
 

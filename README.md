@@ -6,7 +6,7 @@ Launchers like Playnite and Heroic gather your games in one place. UpNext tells 
 
 Website: [upnext.games](https://upnext.games)
 
-UpNext gathers your game libraries from Steam, Epic, GOG, Amazon, the EA app and Ubisoft Connect into one list and looks up what each game is like. Tell it what you're in the mood for ("about an hour, something calm with a bit of story") and it suggests a few games from your backlog that fit, with the reasons. The suggestions come from an AI you choose: your own Claude or ChatGPT subscription, an API key, or a model on your own machine. Without an AI, UpNext ranks your games itself.
+UpNext gathers your game libraries from Steam, Epic, GOG, Amazon, the EA app, Ubisoft Connect and the Xbox app into one list and looks up what each game is like. Tell it what you're in the mood for ("about an hour, something calm with a bit of story") and it suggests a few games from your backlog that fit, with the reasons. The suggestions come from an AI you choose: your own Claude or ChatGPT subscription, an API key, or a model on your own machine. Without an AI, UpNext ranks your games itself.
 
 <img src="docs/images/pick.png" width="800" alt="The Pick page: a request, and a lineup of three games with why each fits and what players say about it">
 

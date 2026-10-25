@@ -4,7 +4,7 @@
 
 ## GET /api/sync/sources
 
-The libraries a sync reads, in order: `[{"id": "steam", "label": "Steam", "blocked": null}, {"id": "gog", "label": "GOG account", "blocked": "not connected"}]`. The ids are `steam`, `heroic`, `gog` (blocked without a GOG sign-in), `epic` (blocked without an Epic sign-in or the Epic Games Launcher), `ea` and `ubisoft` (blocked when nothing they installed is found; Windows only) and `galaxy` (blocked without `galaxy_db`).
+The libraries a sync reads, in order: `[{"id": "steam", "label": "Steam", "blocked": null}, {"id": "gog", "label": "GOG account", "blocked": "not connected"}]`. The ids are `steam`, `heroic`, `gog` (blocked without a GOG sign-in), `epic` (blocked without an Epic sign-in or the Epic Games Launcher), `ea`, `ubisoft` and `xbox` (blocked when nothing they installed is found; Windows only) and `galaxy` (blocked without `galaxy_db`).
 
 ## Enrich options
 

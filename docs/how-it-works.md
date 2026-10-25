@@ -6,6 +6,6 @@
 4. **The AI's summaries** (optional) read each game's player reviews and write "People say" and "Vibes", with review tags from a fixed vocabulary: difficulty, pace, session length, moods, and what players praise or criticize.
 5. **Status**: untouched, sampled (under 2 hours), playing, shelved (has an ending, under 80% through, untouched 60 days), abandoned (shelved for 2 years) or played, plus what you mark yourself. The thresholds are settings.
 6. **Picks**: the candidates are your untouched, sampled and shelved games, one second chance at a time, and endless games and staples as a session. They're ranked by reviews, your request's words and time, and your profile, then cut to about 120. The AI picks from them and must answer in a strict format; every id it returns is checked, with one retry.
-7. **Playing**: picks link straight into Steam, Heroic, Galaxy, the Epic Games Launcher or Ubisoft Connect.
+7. **Playing**: picks link straight into Steam, Heroic, Galaxy, the Epic Games Launcher, Ubisoft Connect or, from the app window on Windows, the Xbox app.
 
 The AI sits behind one interface (`src/llm/`), so every backend does every AI task. [Where things go](contributing/code-map.md) says where each part lives in the code, and [the HTTP API](API.md) has the details of each step.

@@ -17,14 +17,15 @@ Epic games come from Heroic where it's installed, and without it from either of 
 
 `GET /api/settings` has `epic` (that shape) and `epic_launcher_dir` (the manifests folder found, or null), and `GET /api/config` has `epic_connected`. The `epic` profile source counts as configured with Heroic, the sign-in or the launcher, with a `note` naming which.
 
-## The EA app and Ubisoft Connect
+## Installed games on Windows
 
-On Windows, a sync reads what these installed (sync options `ea` and `ubisoft`). Neither has a sign-in UpNext may use for the owned library, so GOG Galaxy's plugins or games added by hand bring the rest. A game uninstalled since stays, as owned and not installed. Neither tracks playtime for UpNext.
+On Windows, a sync reads what these installed (sync options `ea`, `ubisoft` and `xbox`). With no sign-in UpNext may use, GOG Galaxy's plugins or games added by hand bring the rest of the library. A game uninstalled since stays, as owned and not installed. None tracks playtime for UpNext.
 
 - **The EA app**: Windows' Apps list, where an entry is EA's when its uninstall command runs through `EAInstaller` or its folder holds `__Installer\installerdata.xml`, which gives the English title and EA's content id (`source_id`; the folder's name as `dir-…` when there's none). Copies have `source` and `launcher` `origin` and no `run_url`, since EA's launch links take offer ids the installer data doesn't hold.
 - **Ubisoft Connect**: each install under `HKLM\SOFTWARE\Ubisoft\Launcher\Installs\<game id>` (the 32-bit view first) with its `InstallDir`, named by the Apps list's `Uplay Install <game id>` (else the folder's name). A key whose folder is gone is left out. Copies have `source` and `launcher` `uplay`, the game id as `source_id`, and `run_url` `uplay://launch/{id}/0`.
+- **The Xbox app**: its game folders, as [The Xbox app](xbox-app.md) says.
 
-[`GET /api/setup`](setup-wizard.md)'s `stores` has `ea` and `ubisoft`, `{"installed": 3}` (0 off Windows). The profile lists the `origin` ("EA app") and `uplay` ("Ubisoft Connect") sources once they have games.
+[`GET /api/setup`](setup-wizard.md)'s `stores` has `ea`, `ubisoft` and `xbox`, `{"installed": 3}` (0 off Windows). The profile lists the `origin`, `uplay` and `xboxone` sources once they have games.
 
 ## Games added by hand
 

@@ -40,4 +40,4 @@ Cover art is hot-linked by your browser from `images.gog.com`, `images-1.gog-sta
 
 ## Files on your computer
 
-A GOG Galaxy database (`galaxy-2.0.db`) you point at or upload, Heroic's files, the local Steam client's, the Epic Games Launcher's manifests, the EA app's and Ubisoft Connect's installs, and Windows' registry are all read locally. No terms apply.
+A GOG Galaxy database (`galaxy-2.0.db`) you point at or upload, Heroic's files, the local Steam client's, the Epic Games Launcher's manifests, the EA app's, Ubisoft Connect's and the Xbox app's installs, and Windows' registry are all read locally. No terms apply.

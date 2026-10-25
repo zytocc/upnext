@@ -430,6 +430,33 @@ async fn ubisoft_connects_games_stay_owned_once_uninstalled() {
     assert_eq!((g.installed, g.copies[0].run_url.as_str()), (false, "uplay://launch/635/0"));
 }
 
+/// As for Ubisoft Connect: the Xbox app's games read before stay,
+/// uninstalled, with their launch links, as Xbox games.
+#[tokio::test]
+async fn xbox_app_games_stay_owned_once_uninstalled() {
+    let t = setup().await;
+    let opts = SyncOptions {
+        libraries: ["steam", "heroic", "gog", "epic", "ea", "ubisoft"].map(|l| (l.to_string(), false)).into(),
+        ..Default::default()
+    };
+    let forza = crate::xbox::copy(&crate::xbox::XboxInstall {
+        family: "Microsoft.SunriseBaseGame_8wekyb3d8bbwe".into(),
+        app_id: Some("Game".into()),
+        store_id: Some("9NKX70BBCDRN".into()),
+        name: "Forza Horizon 5".into(),
+    });
+    t.db.sync_source(PlayerId::FIRST, "xboxone", "xboxone", &[forza]).unwrap();
+    let log = Log::default();
+    run_sync(&t.db, &t.cfg, &t.clients, &opts, &log).await.unwrap();
+    assert!(log.text().contains("Xbox app: 1 game (0 new, 1 updated, 0 removed)"), "{}", log.text());
+    let g = t.game("Forza Horizon 5");
+    let c = &g.copies[0];
+    assert_eq!(
+        (g.installed, c.source.as_str(), c.run_url.as_str()),
+        (false, "xboxone", r"shell:AppsFolder\Microsoft.SunriseBaseGame_8wekyb3d8bbwe!Game")
+    );
+}
+
 /// A job's summary counts one of something in the singular: "1 second
 /// chance", not "1 second chances", and every id still reads as before for
 /// other counts.
@@ -474,7 +501,7 @@ fn sync_options_json_keeps_its_shape() {
     let resolved = serde_json::to_value(o.resolved()).unwrap();
     assert_eq!(
         resolved,
-        json!({"ea": true, "ubisoft": true, "epic": true, "steam": true, "heroic": false, "gog": true, "galaxy": true, "steam_local": false, "galaxy_db": null})
+        json!({"ea": true, "ubisoft": true, "xbox": true, "epic": true, "steam": true, "heroic": false, "gog": true, "galaxy": true, "steam_local": false, "galaxy_db": null})
     );
 }
 

@@ -349,11 +349,12 @@ impl Db {
             ("galaxy", "galaxy", "GOG Galaxy import"),
             ("origin", "origin", "EA app"),
             ("uplay", "uplay", "Ubisoft Connect"),
+            ("xboxone", "xboxone", "Xbox app"),
         ]
         .iter()
         // The stores read only on Windows, or added by hand, are listed
         // once they have games, so they don't read as missing elsewhere.
-        .filter(|(source, _, _)| !matches!(*source, "origin" | "uplay") || counts.contains_key(*source))
+        .filter(|(source, _, _)| !matches!(*source, "origin" | "uplay" | "xboxone") || counts.contains_key(*source))
         .map(|(source, launcher, label)| SourceInfo {
             source: source.to_string(),
             launcher: launcher.to_string(),

@@ -293,10 +293,11 @@ pub struct StoresFound {
     pub epic: EpicFound,
     pub ea: InstallsFound,
     pub ubisoft: InstallsFound,
+    pub xbox: InstallsFound,
 }
 
-/// A launcher whose installed games the registry shows: the EA app or
-/// Ubisoft Connect.
+/// A launcher whose installed games this computer shows: the EA app,
+/// Ubisoft Connect or the Xbox app.
 #[derive(Debug, Serialize, utoipa::ToSchema)]
 pub struct InstallsFound {
     /// Its games installed on the computer UpNext runs on; 0 off Windows.
@@ -460,6 +461,7 @@ async fn setup_get(State(state): State<AppState>, Me(me): Me, caller: Option<axu
     let ea = InstallsFound { installed: crate::ea::installed(&apps).len() };
     let ubisoft_keys = crate::installs::machine_subkey_values(crate::ubisoft::INSTALLS_KEY, "InstallDir");
     let ubisoft = InstallsFound { installed: crate::ubisoft::installed(&ubisoft_keys, &apps).len() };
+    let xbox = InstallsFound { installed: crate::xbox::installed(&crate::xbox::roots()).len() };
     let stores = StoresFound {
         libraries,
         steam,
@@ -469,6 +471,7 @@ async fn setup_get(State(state): State<AppState>, Me(me): Me, caller: Option<axu
         epic,
         ea,
         ubisoft,
+        xbox,
     };
 
     let keys = KeysSet {

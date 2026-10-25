@@ -574,6 +574,9 @@ pub(crate) enum Route {
 
 /// Where a navigation in the window to `to` goes, for a window showing `app`.
 pub(crate) fn route(to: &str, app: &Url) -> Route {
+    if crate::xbox::run_link(to).is_some() {
+        return Route::System;
+    }
     let Ok(url) = Url::parse(to) else { return Route::Block };
     match url.scheme() {
         "http" | "https" if url.origin() == app.origin() => {
@@ -593,6 +596,9 @@ pub(crate) fn route(to: &str, app: &Url) -> Route {
 /// Where a link asking for a new window (`target="_blank"`) goes: never a
 /// second window, the desktop for anything it can open.
 pub(crate) fn route_new_window(to: &str) -> Route {
+    if crate::xbox::run_link(to).is_some() {
+        return Route::System;
+    }
     match Url::parse(to) {
         Ok(url) if handed_out(url.scheme()) => Route::System,
         _ => Route::Block,
@@ -607,7 +613,9 @@ fn handed_out(scheme: &str) -> bool {
 
 /// The launchers' schemes, which the UI uses only for the Play buttons'
 /// links. Epic's and Ubisoft's are their launchers' own (`epic::run_url`,
-/// `ubisoft::run_url`).
+/// `ubisoft::run_url`). The Xbox app's games start through Windows' own
+/// `shell:` links, which can name any folder or program, so those are
+/// checked whole (`xbox::run_link`) rather than by their scheme.
 fn launcher_link(scheme: &str) -> bool {
     matches!(scheme, "steam" | "heroic" | "goggalaxy" | "com.epicgames.launcher" | "uplay")
 }
@@ -666,14 +674,16 @@ const LAUNCH_WAIT: std::time::Duration = std::time::Duration::from_secs(2);
 /// desktop couldn't open leaves the window as it was, to try again; web
 /// pages and the window started any other way never close it.
 pub(crate) fn closes_after_launch(to: &str, opened: bool, env: impl Fn(&str) -> Option<std::ffi::OsString>) -> bool {
-    let plays = Url::parse(to).is_ok_and(|url| starts_a_game(&url));
+    let plays = crate::xbox::run_link(to).is_some() || Url::parse(to).is_ok_and(|url| starts_a_game(&url));
     opened && plays && under_steams_big_screen(&env)
 }
 
 /// Hand `url` to the desktop; whether it took it. On Linux that means
-/// `xdg-open` started, not that a launcher answered.
+/// `xdg-open` started, not that a launcher answered. An Xbox app game's
+/// link goes as UpNext made it, whatever the webview encoded on the way.
 fn open_outside(url: &str) -> bool {
-    open::that_detached(url).inspect_err(|e| tracing::warn!("couldn't open {url}: {e}")).is_ok()
+    let url = crate::xbox::run_link(url).unwrap_or_else(|| url.to_string());
+    open::that_detached(&url).inspect_err(|e| tracing::warn!("couldn't open {url}: {e}")).is_ok()
 }
 
 /// The window's icon on Windows: the exe's own, which `build.rs` adds as
@@ -1577,6 +1587,8 @@ mod tests {
             "goggalaxy://openGameView/gog_1207658924",
             "com.epicgames.launcher://apps/ns%3Aitem%3AFortnite?action=launch&silent=true",
             "uplay://launch/635/0",
+            r"shell:AppsFolder\Microsoft.SunriseBaseGame_8wekyb3d8bbwe!Game",
+            "shell:AppsFolder%5CMicrosoft.SunriseBaseGame_8wekyb3d8bbwe%21Game",
             // The server's links that aren't pages: the Steam sign-in, downloads.
             "http://127.0.0.1:8787/api/steam/login",
             "http://127.0.0.1:8787/api/export",
@@ -1599,8 +1611,13 @@ mod tests {
             "com.epicgames.launcher.evil://apps/x",
             "uplayx://launch/635/0",
             "steam2://run/620",
+            // Windows' shell: links other than an Xbox app game's.
+            "shell:Startup",
+            r"shell:System\cmd.exe",
+            r"shell:AppsFolder\Microsoft.SunriseBaseGame_8wekyb3d8bbwe!Game\..\cmd",
         ] {
             assert_eq!(route(block, &app), Route::Block, "{block}");
+            assert_eq!(route_new_window(block), Route::Block, "{block}");
         }
         // A page whose name starts like the API's is still a page.
         assert_eq!(route("http://127.0.0.1:8787/apis", &app), Route::Stay);
@@ -1929,6 +1946,7 @@ mod tests {
             "heroic://launch/legendary/Fortnite",
             "com.epicgames.launcher://apps/ns%3Aitem%3AFortnite?action=launch&silent=true",
             "uplay://launch/635/0",
+            r"shell:AppsFolder\Microsoft.SunriseBaseGame_8wekyb3d8bbwe!Game",
         ] {
             assert!(closes_after_launch(play, true, env(big_picture)), "{play}");
             // A link the desktop couldn't open leaves the window to try again.

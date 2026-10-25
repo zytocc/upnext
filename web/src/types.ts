@@ -170,8 +170,8 @@ export interface StopReason {
 
 export type Source = 'steam' | 'epic' | 'gog' | 'amazon'
 /** Who brought a copy in: a launcher, a store's own account or launcher
- *  (`gog`, `epic`, `origin`, `uplay`), or a list added by hand (`manual`). */
-export type Launcher = 'steam' | 'heroic' | 'galaxy' | 'gog' | 'epic' | 'origin' | 'uplay' | 'manual'
+ *  (`gog`, `epic`, `origin`, `uplay`, `xboxone`), or a list added by hand (`manual`). */
+export type Launcher = 'steam' | 'heroic' | 'galaxy' | 'gog' | 'epic' | 'origin' | 'uplay' | 'xboxone' | 'manual'
 
 export interface Copy {
   game_id: number

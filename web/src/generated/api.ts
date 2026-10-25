@@ -3624,8 +3624,8 @@ export interface components {
             error?: string | null;
         };
         /**
-         * @description A launcher whose installed games the registry shows: the EA app or
-         *     Ubisoft Connect.
+         * @description A launcher whose installed games this computer shows: the EA app,
+         *     Ubisoft Connect or the Xbox app.
          */
         InstallsFound: {
             /** @description Its games installed on the computer UpNext runs on; 0 off Windows. */
@@ -5150,6 +5150,7 @@ export interface components {
             epic: components["schemas"]["EpicFound"];
             ea: components["schemas"]["InstallsFound"];
             ubisoft: components["schemas"]["InstallsFound"];
+            xbox: components["schemas"]["InstallsFound"];
         };
         /** @description A smaller series folded into a bigger one, and which owned games are in it. */
         SubSeries: {

@@ -18,7 +18,7 @@ What every step shows, read fresh each time, with no AI or network call.
               "owner": "Alex", "other_users": ["/home/sam/.config/heroic"]},
    "gog": {"connected": false, "username": null}, "galaxy": {"path": null, "exists": false},
    "epic": {"connected": false, "display_name": null, "launcher_dir": null, "installed": null},
-   "ea": {"installed": 0}, "ubisoft": {"installed": 0}},
+   "ea": {"installed": 0}, "ubisoft": {"installed": 0}, "xbox": {"installed": 0}},
  "keys": {"steam_api_key": false, "steam_id": true, "rawg": false, "igdb": false},
  "ai": {"backend": "claude-cli", "available": true, "error": null, "claude": "/home/you/.local/bin/claude", "claude_install": null, "claude_token": false},
  "library": {"titles": 99, "copies": 99, "multi_store": 0, "by_source": {"steam": 95, "gog": 2, "epic": 2, "amazon": 0},

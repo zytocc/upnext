@@ -69,7 +69,7 @@ pub fn configured_sources(cfg: &Config, state: &AppState, who: PlayerId, p: &mut
             "galaxy" => s.configured = cfg.galaxy_db.as_ref().is_some_and(|p| p.is_file()) || s.last_sync.is_some(),
             // Their games come from Windows' installs, GOG Galaxy or a list
             // typed in, and the row is only there when it has some.
-            "origin" | "uplay" => s.configured = s.count > 0,
+            "origin" | "uplay" | "xboxone" => s.configured = s.count > 0,
             _ => s.configured = if s.launcher == "steam" { steam } else { heroic },
         }
     }

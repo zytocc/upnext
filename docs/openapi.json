@@ -17215,7 +17215,7 @@
       },
       "InstallsFound": {
         "type": "object",
-        "description": "A launcher whose installed games the registry shows: the EA app or\nUbisoft Connect.",
+        "description": "A launcher whose installed games this computer shows: the EA app,\nUbisoft Connect or the Xbox app.",
         "required": [
           "installed"
         ],
@@ -21354,7 +21354,8 @@
           "galaxy",
           "epic",
           "ea",
-          "ubisoft"
+          "ubisoft",
+          "xbox"
         ],
         "properties": {
           "libraries": {
@@ -21382,6 +21383,9 @@
             "$ref": "#/components/schemas/InstallsFound"
           },
           "ubisoft": {
+            "$ref": "#/components/schemas/InstallsFound"
+          },
+          "xbox": {
             "$ref": "#/components/schemas/InstallsFound"
           }
         }

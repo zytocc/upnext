@@ -35,6 +35,7 @@ describe('Where a copy came from', () => {
     expect(storeVia({ source: 'epic', launcher: 'heroic' })).toBe('Epic via Heroic')
     expect(storeVia({ source: 'origin', launcher: 'origin' })).toBe('EA app')
     expect(storeVia({ source: 'uplay', launcher: 'galaxy' })).toBe('Ubisoft Connect via GOG Galaxy')
+    expect(storeVia({ source: 'xboxone', launcher: 'xboxone' })).toBe('Xbox')
   })
 
   it('says a game on a list was added by hand', () => {

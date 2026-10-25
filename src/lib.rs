@@ -72,6 +72,7 @@ mod ubisoft;
 mod verdicts;
 mod wikidata;
 mod wishlist;
+mod xbox;
 
 pub use config::Config;
 pub use db::{GameFilter, Status};
