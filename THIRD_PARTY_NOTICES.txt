@@ -711,9 +711,10 @@ RAWG (https://rawg.io): Tags, genres and ratings, with your own key.
     RAWG API terms: https://rawg.io/apidocs
 IGDB (https://www.igdb.com): Genres, themes, keywords and trailers, with your own Twitch app.
     Twitch Developer Services Agreement: https://legal.twitch.com/en/legal/developer-agreement/
-Wikidata (https://www.wikidata.org): Links between stores and databases, and series.
+Wikidata (https://www.wikidata.org): Links between stores and databases, series, and genres for games added by hand.
     Wikidata data is CC0.
     CC0 1.0: https://creativecommons.org/publicdomain/zero/1.0/
+libretro (https://www.libretro.com): Box art for games added by hand from an emulator.
 ProtonDB (https://www.protondb.com): How well games run on Linux through Proton.
 GOG (https://www.gog.com): Your GOG library and playtime, store tags and reviews.
 Epic Games (https://store.epicgames.com): Your Epic library and playtime, when you sign in.
