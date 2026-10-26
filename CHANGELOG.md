@@ -4,7 +4,7 @@ All notable changes to UpNext are listed here. The format follows [Keep a Change
 
 ## [Unreleased]
 
-## [0.1.2] - 2026-10-25
+## [0.1.2] - 2026-10-26
 
 ### Added
 
