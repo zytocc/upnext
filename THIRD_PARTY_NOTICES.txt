@@ -109,8 +109,8 @@ cookie 0.18.2  MIT OR Apache-2.0  [84]
     https://crates.io/crates/cookie/0.18.2
 cpufeatures 0.3.1  MIT OR Apache-2.0  [149]
     https://crates.io/crates/cpufeatures/0.3.1
-crc32fast 1.5.2  MIT OR Apache-2.0  [85]
-    https://crates.io/crates/crc32fast/1.5.2
+crc32fast 1.5.3  MIT OR Apache-2.0  [85]
+    https://crates.io/crates/crc32fast/1.5.3
 crossbeam-channel 0.5.17  MIT OR Apache-2.0  [150, 167]
     https://crates.io/crates/crossbeam-channel/0.5.17
 crossbeam-utils 0.8.23  MIT OR Apache-2.0  [150]
@@ -323,8 +323,8 @@ matchers 0.2.0  MIT  [31]
     https://crates.io/crates/matchers/0.2.0
 matchit 0.8.4  MIT AND BSD-3-Clause  [32, 169]
     https://crates.io/crates/matchit/0.8.4
-mdns-sd 0.21.5  Apache-2.0 OR MIT  [117]
-    https://crates.io/crates/mdns-sd/0.21.5
+mdns-sd 0.21.6  Apache-2.0 OR MIT  [117]
+    https://crates.io/crates/mdns-sd/0.21.6
 memchr 2.8.3  Unlicense OR MIT  [3, 142]
     https://crates.io/crates/memchr/2.8.3
 memoffset 0.9.1  MIT  [33]
@@ -505,8 +505,8 @@ time-macros 0.2.32  MIT OR Apache-2.0  [161]
     https://crates.io/crates/time-macros/0.2.32
 tinystr 0.8.4  Unicode-3.0  [73]
     https://crates.io/crates/tinystr/0.8.4
-tokio 1.53.3  MIT  [69]
-    https://crates.io/crates/tokio/1.53.3
+tokio 1.54.1  MIT  [69]
+    https://crates.io/crates/tokio/1.54.1
 tokio-macros 2.7.2  MIT  [50]
     https://crates.io/crates/tokio-macros/2.7.2
 tokio-rustls 0.26.6  MIT OR Apache-2.0  [132]
@@ -3719,7 +3719,7 @@ SOFTWARE.
 
 ==============================================================================
 [69] LICENSE, MIT
-Used by: tokio 1.53.3, tokio-util 0.7.19
+Used by: tokio 1.54.1, tokio-util 0.7.19
 ==============================================================================
 
 MIT License
@@ -4572,7 +4572,7 @@ DEALINGS IN THE SOFTWARE.
 
 ==============================================================================
 [85] LICENSE-MIT
-Used by: crc32fast 1.5.2
+Used by: crc32fast 1.5.3
 ==============================================================================
 
 MIT License
@@ -5468,7 +5468,7 @@ DEALINGS IN THE SOFTWARE.
 
 ==============================================================================
 [117] LICENSE-MIT
-Used by: mdns-sd 0.21.5
+Used by: mdns-sd 0.21.6
 ==============================================================================
 
 MIT License
