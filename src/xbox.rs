@@ -204,7 +204,7 @@ pub fn installed(roots: &[PathBuf]) -> Vec<XboxInstall> {
 #[cfg_attr(not(windows), allow(dead_code))]
 pub fn gaming_root_folders(bytes: &[u8]) -> Vec<String> {
     let body = if bytes.starts_with(b"RGBX") { bytes.get(8..).unwrap_or_default() } else { bytes };
-    let units: Vec<u16> = body.chunks_exact(2).map(|c| u16::from_le_bytes([c[0], c[1]])).collect();
+    let units: Vec<u16> = body.as_chunks::<2>().0.iter().map(|c| u16::from_le_bytes(*c)).collect();
     units
         .split(|u| *u == 0)
         .filter_map(|name| String::from_utf16(name).ok())
