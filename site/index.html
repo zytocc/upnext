@@ -244,7 +244,8 @@
             <h3 id="p-linux">Debian, Ubuntu, Fedora, openSUSE</h3>
           </header>
           <p class="mono">.deb · .rpm · x86_64 and arm64</p>
-          <p class="about">Packages for Debian, Ubuntu and Fedora, and for distributions built on them: Fedora-based ones such as Nobara, and Debian-based ones such as PikaOS. The .rpm should work on openSUSE Tumbleweed too, though it hasn't been tried there or on Nobara and PikaOS yet. Elsewhere, use the <a href="https://github.com/zytocc/upnext/blob/main/docs/install/linux.md#release-archive">release's archive</a> or Flatpak.</p>
+          <p class="about">Packages for Debian, Ubuntu and Fedora, and for distributions built on them: Fedora-based ones such as Nobara, and Debian-based ones such as PikaOS. The .rpm should work on openSUSE Tumbleweed too, though it hasn't been tried there or on Nobara and PikaOS yet. Elsewhere, use the <a href="https://github.com/zytocc/upnext/blob/main/docs/install/linux.md#release-archive">release's archive</a> or Flatpak. One command installs the right one for your distribution, after checking it against the release's SHA-256:</p>
+          <pre><code><span>curl -fsSL https://upnext.games/install.sh | sh</span></code></pre>
           <div class="links">
             <a class="button primary small" href="https://github.com/zytocc/upnext/releases/latest">Download<span class="vh"> for Debian, Ubuntu, Fedora and openSUSE</span></a>
             <a href="https://github.com/zytocc/upnext/blob/main/docs/install/linux.md#debian-ubuntu-and-fedora">Install guide<span class="vh"> for Debian, Ubuntu, Fedora and openSUSE</span></a>
@@ -257,7 +258,7 @@
             <h3 id="p-arch">Arch Linux, CachyOS</h3>
           </header>
           <p class="mono">PKGBUILD · x86_64 (builds on aarch64)</p>
-          <p class="about">Each release has a PKGBUILD for <code>upnext-bin</code> and a ready-built package for pacman, for Arch and the distributions built on it, like CachyOS. An AUR package will follow.</p>
+          <p class="about">Each release has a PKGBUILD for <code>upnext-bin</code> and a ready-built package for pacman, for Arch and the distributions built on it, like CachyOS. An AUR package will follow. <code>curl -fsSL https://upnext.games/install.sh | sh</code> installs the pacman package too.</p>
           <div class="links">
             <a class="button primary small" href="https://github.com/zytocc/upnext/releases/latest">Download<span class="vh"> for Arch Linux</span></a>
             <a href="https://github.com/zytocc/upnext/blob/main/docs/install/linux.md#arch-linux">Install guide<span class="vh"> for Arch Linux</span></a>

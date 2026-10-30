@@ -25,7 +25,8 @@ UpNext runs on your own computer and keeps everything in a local database. It ha
 | Platform | Get it | Guide |
 |---|---|---|
 | Windows 10 and 11 | [The installer](https://github.com/zytocc/upnext/releases/latest/download/upnext-x86_64-pc-windows-msvc.msi) (`.msi`) from the latest release | [Windows](docs/install/windows.md) |
-| Debian, Ubuntu, Fedora | The `.deb` or `.rpm` from a release | [Linux](docs/install/linux.md) |
+| Linux | `curl -fsSL https://upnext.games/install.sh \| sh`, which installs the package for your distribution | [Linux](docs/install/linux.md#one-command) |
+| Debian, Ubuntu, Fedora | The `.deb` or `.rpm` from a release | [Linux](docs/install/linux.md#debian-ubuntu-and-fedora) |
 | Arch Linux | The release's `PKGBUILD` | [Linux](docs/install/linux.md#arch-linux) |
 | Any Linux, Steam Deck | The Flatpak | [Flatpak and Steam Deck](docs/install/flatpak.md) |
 | Other Linux | The release archive | [Linux](docs/install/linux.md#release-archive) |

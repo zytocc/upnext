@@ -1,5 +1,13 @@
 # Linux
 
+## One command
+
+```sh
+curl -fsSL https://upnext.games/install.sh | sh
+```
+
+This installs the newest release the way the sections below do by hand: the `.deb` with apt on Debian and Ubuntu, the `.rpm` with dnf on Fedora or zypper on openSUSE, the pacman package on Arch (x86_64), and the Flatpak on SteamOS. sudo asks for your password to install the package. On any other distribution, or with `| sh -s -- --user` in place of `| sh`, it puts `upnext` and `upnext-app` in `~/.local/bin` and UpNext in your launcher, without sudo. Each download is checked against the SHA-256 beside it on the release page before anything is installed, and your library is never touched. Run it again for a newer release; `| sh -s -- --version 0.1.2` installs a given one. To read it first, open [upnext.games/install.sh](https://upnext.games/install.sh), which is [site/install.sh](../../site/install.sh) in this repository.
+
 ## Debian, Ubuntu and Fedora
 
 Each [release](https://github.com/zytocc/upnext/releases) has packages for x86_64 and arm64: a `.deb` for Debian 12 and 13 and Ubuntu 22.04, 24.04 and 26.04, and an `.rpm` for Fedora 43 to 45. They put `upnext` and `upnext-app` in `/usr/bin`, UpNext in your launcher under Games, and the user service in place, and your package manager brings WebKitGTK and GTK with them. Set `V` to the release's version; on arm64 the files end in `_arm64.deb` and `.aarch64.rpm`.
@@ -45,7 +53,7 @@ If you had UpNext from `cargo install` before, run `cargo uninstall upnext`, sin
 
 ## Release archive
 
-Each release also has an archive for Linux on x86_64 and arm64, with `upnext` and `upnext-app` and the web UI built in. It needs glibc 2.35 or newer (Ubuntu 22.04, Debian 12, Fedora 36, Arch and later), and WebKitGTK 4.1 and GTK 3 for the app window, which most desktops already have (`sudo apt install libwebkit2gtk-4.1-0 libgtk-3-0` on Debian and Ubuntu, `sudo pacman -S webkit2gtk-4.1 gtk3` on Arch, `sudo dnf install webkit2gtk4.1 gtk3` on Fedora).
+Each release also has an archive for Linux on x86_64 and arm64, with `upnext` and `upnext-app` and the web UI built in. It needs glibc 2.35 or newer (Ubuntu 22.04, Debian 12, Fedora 36, Arch and later), and WebKitGTK 4.1 and GTK 3, which both programs link and most desktops already have (`sudo apt install libwebkit2gtk-4.1-0 libgtk-3-0` on Debian and Ubuntu, `sudo pacman -S webkit2gtk-4.1 gtk3` on Arch, `sudo dnf install webkit2gtk4.1 gtk3` on Fedora).
 
 ```sh
 curl -LO https://github.com/zytocc/upnext/releases/latest/download/upnext-x86_64-unknown-linux-gnu.tar.xz

@@ -7,6 +7,7 @@ All notable changes to UpNext are listed here. The format follows [Keep a Change
 ### Added
 
 - On Windows, the games the Xbox app installed come in by themselves, Game Pass games included, as Xbox games marked installed, and Play in the app window starts them through Windows. UpNext reads each game's own files in the Xbox app's install folders, with no sign-in, so the games you own but haven't installed, and playtime, still come from GOG Galaxy or a list typed in. The sync option is `xbox`, and the setup wizard counts them.
+- One command installs UpNext on Linux: `curl -fsSL https://upnext.games/install.sh | sh` installs the newest release's `.deb` with apt, its `.rpm` with dnf or zypper, its pacman package on Arch, or its Flatpak on SteamOS, and elsewhere (or with `--user`) puts the programs in `~/.local/bin` and UpNext in the launcher without sudo. Each download is checked against the release's SHA-256 first, and running it again updates UpNext.
 
 ## [0.1.2] - 2026-10-26
 
