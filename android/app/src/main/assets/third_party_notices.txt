@@ -6,9 +6,9 @@ Apache License 2.0, whose text is below.
 
 AndroidX Activity 1.9.3
     © The Android Open Source Project
-AndroidX Core 1.15.0
+AndroidX Core 1.19.1
     © The Android Open Source Project
-kotlinx.serialization 1.11.0
+kotlinx.serialization 1.12.0
     © JetBrains s.r.o. and contributors
 Kotlin standard library 2.4.21
     © JetBrains s.r.o. and Kotlin Programming Language contributors
