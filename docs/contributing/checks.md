@@ -1,7 +1,5 @@
 # Checks
 
-[Contributing](../../CONTRIBUTING.md) › Checks. Also: [where things go](code-map.md).
-
 CI (`.github/workflows/ci.yml`) runs all of these. Run them before you push.
 
 ```sh
@@ -18,30 +16,22 @@ npx tsc -b
 npm run lint                             # oxlint
 npm test                                 # Vitest
 npx vite build
+
+cd ../services/verdicts                  # the backlog verdicts service
+npm ci
+npm run licenses && npm run typecheck && npm run lint && npm test && npm run build
 ```
 
-`cargo deny` comes from `cargo install --locked cargo-deny`.
+`cargo deny` comes from `cargo install --locked cargo-deny`. The default build links WebKitGTK and GTK 3 (`libwebkit2gtk-4.1-dev libgtk-3-dev pkg-config` on Debian and Ubuntu); `--no-default-features` builds the server alone.
 
 ## Third-party notices
 
-After a change to `Cargo.lock`, `web/package-lock.json`, `android/gradle/libs.versions.toml` or `web/src/lib/credits.ts`, regenerate the third-party notices every release carries, and commit them with the change. The `notices` workflow fails until they match.
+After a change to `Cargo.lock`, `web/package-lock.json`, `android/gradle/libs.versions.toml` or `web/src/lib/credits.ts`, regenerate the third-party notices and commit `THIRD_PARTY_NOTICES.txt` and the Android app's copy with the change. The `notices` workflow fails until they match.
 
 ```sh
 cargo install --locked cargo-about --version 0.9.2 --features cli   # once
 cargo fetch --locked && (cd web && npm ci)
 node contrib/notices/generate.mjs           # --check only compares
-```
-
-`docs/dev/RELEASE.md`, "Third-party notices", says what goes in them.
-
-## The backlog verdicts service
-
-It has its own checks, in its own folder, and CI runs them too:
-
-```sh
-cd services/verdicts
-npm ci
-npm run licenses && npm run typecheck && npm run lint && npm test && npm run build
 ```
 
 ## End-to-end test
@@ -58,7 +48,7 @@ npm run e2e
 
 `web/e2e/serve.sh` starts the server in a throwaway folder with its own `HOME`, so nothing on your machine is read.
 
-The README's screenshot, `docs/images/pick.png`, and the store listings' big-screen one, `docs/images/big-screen.png`, are taken the same way: `UPNEXT_README_SHOT=1 npx playwright test readme-shot` writes both after Curate on the mock library. The covers come from Steam's image servers, so it needs a machine that reaches them, and it fails rather than save a shot whose covers are name cards.
+`UPNEXT_README_SHOT=1 npx playwright test readme-shot` remakes the README's screenshot (`docs/images/pick.png`) and the big-screen one (`docs/images/big-screen.png`) on the mock library. It needs a machine that can reach Steam's image servers.
 
 ## Windows
 

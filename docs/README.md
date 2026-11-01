@@ -11,12 +11,12 @@ Start with [the README](../README.md) for what UpNext is and how to install it.
 - [Stores and accounts](stores.md): what UpNext reads from each store, and what each needs.
 - [Choosing an AI](ai.md): the options, their defaults, and using UpNext without one.
 - [Running UpNext](running.md): starting it at login, the app window, where it keeps things, and backups.
-- [Big screen](big-screen.md), and [big screen with Steam](steam.md).
+- [Big screen](big-screen.md), on a TV, a handheld or through Steam.
 - [Backlog verdicts](backlog-verdicts.md): telling other players how a game fits a backlog, and reading what they said.
 - [Several people, one computer](players.md): players, PINs and hiding games.
 - [Other devices and scripts](other-devices.md): phones, other computers, HTTPS and proxies.
-- [Commands](commands.md): the command line.
-- [How it works](how-it-works.md): from a sync to a pick.
+- [Commands](commands.md)
+- [How it works](how-it-works.md): from a sync to a pick, and the other ways to pick.
 
 ## Privacy and security
 

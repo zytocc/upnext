@@ -1,7 +1,5 @@
 # Where things go
 
-[Contributing](../../CONTRIBUTING.md) › Where things go. Also: [checks](checks.md).
-
 ## Sources
 
 Everything `upnext enrich` can fetch is a list in `src/enrich/sources.rs`. A new source is one file under `src/enrich/sources/` and one line in `registry()`.
@@ -9,8 +7,8 @@ Everything `upnext enrich` can fetch is a list in `src/enrich/sources.rs`. A new
 - A `TitleSource` is fetched per title, in a lane of its own (one lane per rate-limited host). It names its options (`Opt::new("id", "Label")`, `.off()` for opt-in, `.blocked(...)` when it needs a key or a setting), says which titles it `needs`, and `run`s for one title. `src/enrich/sources/protondb.rs` is a short example.
 - A `Pass` runs once over the whole library, before or after the lanes: the AI summaries, series guides and the wishlist.
 - The CLI's `--only`, `--skip` and `--with`, the jobs API and Settings all read the list, so a new source shows up in each without further wiring.
-- The client for the service goes in its own module (`src/protondb.rs`) and into `Clients` in `src/enrich.rs`. It takes a base URL so tests can point it at a `wiremock` server; tests never call the real service.
-- Add the service to its page in [Third-party services](../THIRD_PARTY.md) (what is called, the terms, what they ask for), and its attribution to Settings › About (`web/src/lib/credits.ts`) if its terms want one.
+- The client for the service goes in its own module (`src/protondb.rs`) and into `Clients` in `src/enrich.rs`. It takes a base URL so tests can point it at a `wiremock` server.
+- Add the service to its page in [Third-party services](../THIRD_PARTY.md) (what is called, the terms, what they ask for), and its attribution to Settings › About (`web/src/lib/credits.ts`) if its terms want one. The two lists stay in step.
 
 ## Stores
 
@@ -28,9 +26,9 @@ A new route needs a `#[utoipa::path]` attribute and an entry in `src/server/open
 
 ## The schema
 
-`src/db/schema.rs`. A new database gets `SCHEMA`; an older one backs itself up and upgrades itself on open through the steps in `UPGRADES`. Versions start at v29 (`BASELINE_VERSION`), the schema of the first release, and a database from an earlier development build is refused.
+`src/db/schema.rs`. A new database gets `SCHEMA`; an older one backs itself up and upgrades itself on open through the steps in `UPGRADES`.
 
-A change bumps `SCHEMA_VERSION`, changes `SCHEMA`, and adds the step that brings a database at the version before to the same tables. Then `UPNEXT_UPDATE_SCHEMA_FIXTURE=1 cargo test write_current_fixture` writes `tests/fixtures/schema/vN.sql` for the new version. `src/db/migration_tests.rs` checks that every version since the baseline upgrades to a new database's tables and keeps its rows; add a test there for any rows the step moves or repairs.
+A change bumps `SCHEMA_VERSION`, changes `SCHEMA`, and adds the step that brings a database at the version before to the same tables. Then `UPNEXT_UPDATE_SCHEMA_FIXTURE=1 cargo test write_current_fixture` writes `tests/fixtures/schema/vN.sql` for the new version. Add a test in `src/db/migration_tests.rs` for any rows the step moves or repairs.
 
 ## The AI
 
@@ -46,11 +44,15 @@ A change bumps `SCHEMA_VERSION`, changes `SCHEMA`, and adds the step that brings
 
 ## The Flatpak
 
-`contrib/flatpak/`: the manifest, its launcher entry and AppStream metadata, and the scripts that write its offline sources, build it and try it ([its README](../../contrib/flatpak/README.md)). A new crate or npm package needs nothing there, because the sources are generated from the lock files at each build. A new folder outside UpNext's own that the app reads on Linux needs a read-only `--filesystem` line in the manifest, with a reason in that README. `src/flatpak.rs` is where the app learns it runs in one. The `flatpak` workflow builds it when `UPNEXT_FLATPAK_CI` is on.
+`contrib/flatpak/`: the manifest, its launcher entry and AppStream metadata, and the scripts that write its offline sources, build it and try it ([its README](../../contrib/flatpak/README.md)). A new folder outside UpNext's own that the app reads on Linux needs a read-only `--filesystem` line in the manifest, with a reason in that README. `src/flatpak.rs` is where the app learns it runs in one. The `flatpak` workflow builds it when `UPNEXT_FLATPAK_CI` is on.
 
 ## The Steam copy
 
-`contrib/steam/`: the scripts that lay out its two depots from a release, run the Linux one without GTK or WebKitGTK and upload them with steamcmd, the SteamPipe build files, the store text and the library images ([its README](../../contrib/steam/README.md)). A new library the app links on Linux comes into the Linux depot by itself; one that must come from the computer instead, as part of the graphics driver's stack, goes in `contrib/steam/linux-exclude.txt` with the reason. `src/steam_copy.rs` is where the app learns it's the Steam copy.
+`contrib/steam/`: the scripts that lay out its two depots from a release, run the Linux one without GTK or WebKitGTK and upload them with steamcmd, the SteamPipe build files, the store text and the library images ([its README](../../contrib/steam/README.md)). A library that must come from the computer rather than the depot, such as part of the graphics driver's stack, goes in `contrib/steam/linux-exclude.txt`. `src/steam_copy.rs` is where the app learns it's the Steam copy.
+
+## Shared game data
+
+`src/seed.rs`. The seed file is gzipped JSON lines. The first line is a header (`upnext_seed`, `date`, `count`, `licence`, `notice`, and `sha256` of everything after it); each other line is one game, keyed by `steam_appid` or `gog_id`, with its `people_say`, `vibes` and `tags`. A field the format doesn't list refuses the whole file. `upnext-seed.json` is the manifest beside it, with the file's name, size and SHA-256.
 
 ## The backlog verdicts service
 
