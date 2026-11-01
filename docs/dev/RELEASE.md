@@ -17,7 +17,7 @@ The Microsoft Store package and the Steam depots are run artifacts, not release 
 
 ## Variables and secrets
 
-A feature that is off leaves a notice in the run, not a failure. The one exception is Arch signing: with its variable set and no secret, the release fails.
+A feature that is off leaves a notice in the run, not a failure. Arch signing is different: with its variable set and no secret, the release fails.
 
 | Feature | Job | Turned on by | Set up in |
 |---|---|---|---|

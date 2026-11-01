@@ -24,7 +24,7 @@ Every answer is saved as it's given, through the routes it belongs to: favourite
 
 Off by default (the `play_diary` setting). When it's on, the server reads Steam's recently played games about once an hour (it needs schedules on and the Steam key and ID) and records the minutes each game gained since the last reading. The Play button also records a `launch`, which is the only record of Epic and Amazon games through Heroic, since they report no playtime. The profile reads the diary for the habits it can see over the last 90 days: how long weeknight and weekend sessions run, when you play, and when multiplayer games get played. A habit you state wins over the diary's.
 
-The switch is the household's, one for every player. What it records is each player's own: Steam rows count for the account's owner and the players who play on it, `launch` rows for whoever pressed Play.
+The switch is the household's, one for every player. Each player's records are their own: Steam rows count for the account's owner and the players who play on it, `launch` rows for whoever pressed Play.
 
 ### What the diary shows
 

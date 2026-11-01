@@ -12,7 +12,7 @@ Cloudflare's free tier covers the service until it has many thousands of verdict
 | Workers CPU | 10 ms per request and per Cron Trigger run | The daily run's CPU grows with the number of published verdicts |
 | R2 | 10 GB-month, 1 million writes and 10 million reads a month, no egress charge ([pricing](https://developers.cloudflare.com/r2/pricing/)) | Three writes and a list a day; one read per download |
 
-The first limit you will hit is the daily run's 10 ms of CPU, with many thousands of verdicts. `npx wrangler tail` then shows the scheduled run ending with Error 1102 (CPU time exceeded), and `/verdicts.json` stops getting a new date. The fix is Workers Paid, $5 a month per account ([pricing](https://developers.cloudflare.com/workers/platform/pricing/)), with no code change. Installs keep the last snapshot meanwhile.
+With many thousands of verdicts, the daily run outgrows its 10 ms of CPU first. `npx wrangler tail` then shows the scheduled run ending with Error 1102 (CPU time exceeded), and `/verdicts.json` stops getting a new date. The fix is Workers Paid, $5 a month per account ([pricing](https://developers.cloudflare.com/workers/platform/pricing/)), with no code change. Installs keep the last snapshot meanwhile.
 
 ## First deployment
 

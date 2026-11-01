@@ -60,7 +60,7 @@ Picks and the other AI features call a model. For development you don't need one
 - Refactors change structure only. A change in behaviour goes in its own commit, with a test.
 - Never commit a database, a token, a `.env`, or fixtures cut from a real library. Fixtures in `tests/fixtures/` are made up or trimmed public responses.
 - Keep the README, the guides in `docs/` and the API guide (`docs/API.md` and its pages in `docs/api/`) true to the code in the same change.
-- Write docs plainly: say what it does and what to type, and give a reason only when ignoring it breaks something. Leave out internals a reader can't act on, and history. Each fact has one home page; other pages link to it. Pages stay under 900 words.
+- Write docs plainly: say what it does and what to type, and give a reason only when ignoring it breaks something. Write sentences in plain order, without reveals such as "The one cause is …". Leave out internals a reader can't act on, and history. Each fact has one home page; other pages link to it. Pages stay under 900 words.
 - A changelog entry is one line: what a user notices, without routes or constants.
 
 ## Pull requests

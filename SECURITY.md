@@ -8,7 +8,7 @@ Only the latest release and `main` get security fixes.
 
 ## How UpNext is meant to be used
 
-UpNext is an app for one person or one household. It runs on your own computer or home server and keeps everything in a local SQLite database. It has no accounts and no login page of its own. Players are a convenience, and signing in with your own identity provider only pairs a browser. What protects it is where it listens and who it answers.
+UpNext is an app for one person or one household. It runs on your own computer or home server and keeps everything in a local SQLite database. It has no accounts and no login page of its own. Players are a convenience, and signing in with your own identity provider only pairs a browser. It is protected by where it listens and who it answers.
 
 ## Out of the box: this computer only
 
