@@ -42,7 +42,7 @@
     <div class="wrap">
       <h1 id="hero-title">Play the games you <em>already own</em>.</h1>
       <div class="hero-row">
-        <p class="lede">Finding the right game for the moment can be a struggle. Tell UpNext what you're in the mood for, and it suggests a few games from your own library that fit, with the reasons why.</p>
+        <p class="lede">Tell UpNext what you're in the mood for. It suggests a few games from your own library that fit, and says why.</p>
         <div class="actions">
           <a class="button primary" href="#get">Get UpNext</a>
           <a class="button ghost" href="#how">See how it works</a>
@@ -92,7 +92,7 @@
           <span class="n" aria-hidden="true">1</span>
           <h3>Bring your games together</h3>
           <p>UpNext reads your libraries from Steam, Epic, GOG, Amazon, the EA app and Ubisoft Connect into one list.</p>
-          <p>Then it looks at each game in detail to see how it fits you.</p>
+          <p>Then it looks up each game's genres, length and what players say.</p>
         </li>
         <li>
           <span class="n" aria-hidden="true">2</span>
@@ -149,7 +149,7 @@
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow">What's inside</p>
-        <h2 id="inside-title">A game connoisseur, fitted to you.</h2>
+        <h2 id="inside-title">What it does.</h2>
       </div>
       <div class="inside-grid">
         <dl class="features">
@@ -204,11 +204,10 @@
         </ul>
       </div>
       <div>
-        <p class="eyebrow">Private by design</p>
+        <p class="eyebrow">Privacy</p>
         <h2 id="privacy-title">Your library stays on your computer.</h2>
-        <p>Everything UpNext knows is kept in a database on your own machine. It has no accounts, no ads and no analytics. This site has no trackers either.</p>
+        <p>Everything is kept in a database on your own machine. No accounts, no ads, no analytics, and this site has no trackers either.</p>
         <ul class="ticks">
-          <li>It talks to your stores, game databases and the AI you chose, and never to ad or analytics services</li>
           <li>The AI gets only what the task needs, never your keys, Steam ID, account names or sign-ins</li>
           <li>The <a href="https://github.com/zytocc/upnext/blob/main/docs/privacy.md">privacy page</a> lists every service it talks to and what each one is sent</li>
         </ul>
@@ -221,7 +220,7 @@
       <div class="section-head">
         <p class="eyebrow">Get UpNext</p>
         <h2 id="get-title">Runs where you game.</h2>
-        <p>UpNext runs on Windows, Linux or a home server, and every other device in the house can open it in a browser or the Android app. It's free, with no purchases inside.</p>
+        <p>UpNext runs on Windows, Linux or a home server, and every other device in the house can open it in a browser or the Android app.</p>
       </div>
 
       <div class="platforms">
@@ -244,7 +243,7 @@
             <h3 id="p-linux">Debian, Ubuntu, Fedora, openSUSE</h3>
           </header>
           <p class="mono">.deb · .rpm · x86_64 and arm64</p>
-          <p class="about">Packages for Debian, Ubuntu and Fedora, and for distributions built on them: Fedora-based ones such as Nobara, and Debian-based ones such as PikaOS. The .rpm should work on openSUSE Tumbleweed too, though it hasn't been tried there or on Nobara and PikaOS yet. Elsewhere, use the <a href="https://github.com/zytocc/upnext/blob/main/docs/install/linux.md#release-archive">release's archive</a> or Flatpak. One command installs the right one for your distribution, after checking it against the release's SHA-256:</p>
+          <p class="about">Packages for Debian, Ubuntu, Fedora and the distributions built on them. Elsewhere, use the <a href="https://github.com/zytocc/upnext/blob/main/docs/install/linux.md#release-archive">release's archive</a> or Flatpak. One command installs the right one for your distribution:</p>
           <pre><code><span>curl -fsSL https://upnext.games/install.sh | sh</span></code></pre>
           <div class="links">
             <a class="button primary small" href="https://github.com/zytocc/upnext/releases/latest">Download<span class="vh"> for Debian, Ubuntu, Fedora and openSUSE</span></a>
@@ -258,12 +257,11 @@
             <h3 id="p-arch">Arch Linux, CachyOS</h3>
           </header>
           <p class="mono">PKGBUILD · x86_64 (builds on aarch64)</p>
-          <p class="about">Each release has a PKGBUILD for <code>upnext-bin</code> and a ready-built package for pacman, for Arch and the distributions built on it, like CachyOS. An AUR package will follow. <code>curl -fsSL https://upnext.games/install.sh | sh</code> installs the pacman package too.</p>
+          <p class="about">Each release has a PKGBUILD for <code>upnext-bin</code> and a ready-built package for pacman, for Arch and the distributions built on it, like CachyOS. <code>curl -fsSL https://upnext.games/install.sh | sh</code> installs the pacman package too.</p>
           <div class="links">
             <a class="button primary small" href="https://github.com/zytocc/upnext/releases/latest">Download<span class="vh"> for Arch Linux</span></a>
             <a href="https://github.com/zytocc/upnext/blob/main/docs/install/linux.md#arch-linux">Install guide<span class="vh"> for Arch Linux</span></a>
           </div>
-          <p class="status soon">AUR: coming later</p>
         </article>
 
         <article class="platform" aria-labelledby="p-flatpak">
@@ -286,10 +284,9 @@
             <h3 id="p-deck">Steam Deck</h3>
           </header>
           <p class="mono">SteamOS 3 · Flatpak · big screen</p>
-          <p class="about">Install the Flatpak in Desktop Mode, add UpNext to Steam as a non-Steam game with <code>--big-screen</code>, and it opens with the controller layout in Gaming Mode. A free listing on Steam itself is planned.</p>
+          <p class="about">Install the Flatpak in Desktop Mode, add UpNext to Steam as a non-Steam game with <code>--big-screen</code>, and it opens with the controller layout in Gaming Mode.</p>
           <div class="links">
             <a href="https://github.com/zytocc/upnext/blob/main/docs/install/flatpak.md#on-a-steam-deck">Steam Deck steps</a>
-            <span class="status">Steam: planned</span>
           </div>
         </article>
 
@@ -319,7 +316,6 @@
             <a class="button primary small" href="https://github.com/zytocc/upnext/releases/latest">Download<span class="vh"> the Android app</span></a>
             <a href="https://github.com/zytocc/upnext/blob/main/docs/install/android.md">How pairing works</a>
           </div>
-          <p class="status soon">F-Droid: coming later</p>
         </article>
 
         <article class="platform" aria-labelledby="p-browser">

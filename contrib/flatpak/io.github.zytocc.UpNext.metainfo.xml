@@ -20,13 +20,13 @@
     <ul>
       <li>Steam, and Epic, GOG and Amazon through the Heroic launcher, read from their own files on this computer</li>
       <li>Details for every game: genres, tags, review scores and what players say</li>
-      <li>Picks from an AI you choose (an API key, a server of your own, or Claude Code), or from UpNext's own ranking with no AI at all</li>
+      <li>Picks from an AI you choose (an API key, a server of your own, or Claude Code), or from UpNext's own ranking with no AI</li>
       <li>A taste profile you can read and edit, which learns from what you play</li>
       <li>Big screen: a layout for a gamepad, a Steam Deck or a TV</li>
       <li>Phones and other computers on your network can use it too, once you allow them on this computer</li>
     </ul>
     <p>
-      Everything is kept in a database on this computer. UpNext reads the Steam and Heroic folders and never changes them.
+      Everything is kept in a database on this computer.
     </p>
   </description>
   <launchable type="desktop-id">io.github.zytocc.UpNext.desktop</launchable>
@@ -77,7 +77,7 @@
   <releases>
     <release version="0.1.2" date="2026-10-26">
       <description>
-        <p>Add games from no store by hand, run the AI with a GitHub Copilot plan, and a livelier preview on picks, with many fixes.</p>
+        <p>Add games from no store by hand, run the AI with a GitHub Copilot plan, and a screenshot preview on picks, with many fixes.</p>
       </description>
     </release>
     <release version="0.1.1" date="2026-10-16">

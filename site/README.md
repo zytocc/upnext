@@ -1,13 +1,25 @@
 # upnext.games
 
-UpNext's website: one page in plain HTML and CSS, with no build step, no outside scripts or fonts, and no trackers. `main.js` only types the example requests and adds copy buttons; the page reads the same without it. The colours and fonts are the app's own (the Arcade theme in `web/src/index.css`), and the fonts are copied from the web UI's packages with their licences in `fonts/`. `images/pick.webp` is `docs/images/pick.png` converted to WebP, the other screenshots are of a made-up library from `upnext mock-library`, and each screenshot has other sizes that the page's `srcset` lets the browser choose from: `pick-800.webp` and `pick-1200.webp` for phones and small windows, and `pick-2400.webp` and `pick-3200.webp` for wide and high-density screens, plus `big-screen-640.webp` and `setup-640.webp`. The two large ones come from `web/test-results/pick-3200.png`, which the screenshot spec takes beside the README's (`UPNEXT_README_SHOT=1 npx playwright test readme-shot` in `web/`). When a screenshot is taken again, make its sizes again, for example `convert docs/images/pick.png -resize 800x -quality 82 site/images/pick-800.webp`. The page's widths are percentages of the window and `rem`, so it fills wide screens too. `images/share.png` is the picture a link preview shows. The icon (a d-pad with Up pressed) is drawn inline in `index.html` and `404.html` and is also `favicon.svg`; `apple-touch-icon.png` is the same drawing at 180 pixels, square.
+UpNext's website: one page in plain HTML and CSS, with no build step, no outside scripts or fonts, and no trackers. `main.js` only types the example requests and adds copy buttons. The colours and fonts are the app's own (`web/src/index.css`), with the fonts' licences in `fonts/`.
 
 To look at it, serve the folder (`python3 -m http.server -d site 8080`) and open http://127.0.0.1:8080.
 
+## Screenshots
+
+`images/pick.webp` is `docs/images/pick.png` as WebP; the others are of the made-up library from `upnext mock-library`. Each has smaller and larger sizes for the page's `srcset`. After a new screenshot (`UPNEXT_README_SHOT=1 npx playwright test readme-shot` in `web/`, which also writes `web/test-results/pick-3200.png`), make the sizes again:
+
+```sh
+convert docs/images/pick.png -resize 800x -quality 82 site/images/pick-800.webp
+```
+
 ## Deploying
 
-The site is a Cloudflare Pages project on the bare `upnext.games` (and `www.upnext.games`, if wanted). It never goes on `verdicts.upnext.games`: that name is the backlog verdicts Worker, whose root and `/terms` pages installed copies of UpNext rely on, and the two stay separate deployments. Create the project from this repository in the Cloudflare dashboard (Workers & Pages, Create, Pages, Connect to Git) with no framework preset, an empty build command and `site` as the build output directory, and `site/*` as the only include path under Build watch paths, so a push to `main` publishes the site only when it changes `site/`; or upload the folder by hand with `npx wrangler pages deploy site --project-name upnext-site`. Then add `upnext.games` under the project's Custom domains, which makes the DNS record itself since the domain is on the same account. Leave Cloudflare Web Analytics off for the project. The repository's CI skips `site/`, since there is nothing in it to build or test. `_headers` sets the security headers, including a content security policy that allows only the site's own files, and `404.html` is the page for addresses that don't exist. The project's Deployments list names the commit each deployment was built from; if the newest commit that changed `site/` never shows up there, the project is building some other repository. A Pages project can't be moved to another repository, so make a new project from this one and move the custom domain to it.
+The site is a Cloudflare Pages project on `upnext.games`, separate from the verdicts service on `verdicts.upnext.games`. Its settings: no framework preset, an empty build command, `site` as the build output directory, `site/*` as the only build watch path, and Web Analytics off. To deploy by hand: `npx wrangler pages deploy site --project-name upnext-site`.
 
-`install.sh` is the Linux installer behind `curl -fsSL https://upnext.games/install.sh | sh` ([docs/install/linux.md](../docs/install/linux.md#one-command)). It looks up the newest release on GitHub each time it runs, so a release needs no change here, but a change to it reaches everyone who runs it as soon as the site deploys: check it with `shellcheck -s sh site/install.sh` and run it on a distribution of each kind it handles first. Its own comment lists what it does where. `_headers` serves it as plain text, so a browser shows it.
+`_headers` sets the security headers, including a content security policy that allows only the site's own files. `404.html` is the page for addresses that don't exist.
 
-The Windows, Debian/Fedora and Arch Download buttons go to `releases/latest`, which always opens the newest full release (GitHub skips prereleases there); the footer's Releases link lists them all. The Android card has no Download button until a release carries the APK, which needs the app's signing key (`docs/install/android.md`); add one pointing at `releases/latest` then, and change its status line. The same goes for the Flatpak bundle.
+## install.sh
+
+`install.sh` is the Linux installer behind `curl -fsSL https://upnext.games/install.sh | sh` ([Linux](../docs/install/linux.md#one-command)). It finds the newest release each time it runs, so a release needs no change here. A change to it reaches everyone as soon as the site deploys: check it with `shellcheck -s sh site/install.sh` and run it on each kind of distribution it handles first.
+
+The Download buttons go to `releases/latest`, the newest full release.
