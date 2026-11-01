@@ -1,11 +1,24 @@
 # How it works
 
-1. **Sync** brings in games keyed by store and store id. Steam brings playtime; Heroic doesn't track it, so its games count as untouched until you mark them. A Galaxy import fills playtime for anything Galaxy has seen, and the Epic sign-in for Epic games.
-2. **Titles** group a game's copies across stores, by Steam app id, then exact name, then name without edition words. Remasters and editions merge, and manual merges and splits persist.
-3. **Fetch details** matches each title to the Steam store, then fetches store details, review scores, SteamSpy tags, a few whole player reviews, GOG's tags and reviews, Wikidata cross-references, PCGamingWiki's genres and series, ProtonDB tiers on Linux, and with your keys IGDB and RAWG. Each source is cached, resumable and rate-limited (the Steam store to about one request every 1.6 seconds).
-4. **The AI's summaries** (optional) read each game's player reviews and write "People say" and "Vibes", with review tags from a fixed vocabulary: difficulty, pace, session length, moods, and what players praise or criticize.
-5. **Status**: untouched, sampled (under 2 hours), playing, shelved (has an ending, under 80% through, untouched 60 days), abandoned (shelved for 2 years) or played, plus what you mark yourself. The thresholds are settings.
-6. **Picks**: the candidates are your untouched, sampled and shelved games, one second chance at a time, and endless games and staples as a session. They're ranked by reviews, your request's words and time, and your profile, then cut to about 120. The AI picks from them and must answer in a strict format; every id it returns is checked, with one retry.
-7. **Playing**: picks link straight into Steam, Heroic, Galaxy, the Epic Games Launcher, Ubisoft Connect or, from the app window on Windows, the Xbox app.
+1. **Sync** brings in your games from each store. Steam brings playtime. Heroic doesn't track it, so its games count as untouched until you mark them.
+2. **Titles** group a game's copies across stores, so remasters and editions become one game. You can merge and split by hand.
+3. **Fetch details** adds store details, review scores, tags, player reviews and, on Linux, ProtonDB tiers from Steam, GOG, SteamSpy, Wikidata and PCGamingWiki, and from IGDB and RAWG with your keys.
+4. **The AI's summaries** (optional) read each game's player reviews and write "People say" and "Vibes", plus review tags such as difficulty, pace and session length.
+5. **Status**: untouched, sampled (under 2 hours), playing, shelved (has an ending, under 80% through, untouched for 60 days), abandoned (shelved for 2 years) or played, plus what you mark yourself. The thresholds are settings.
+6. **Picks**: your untouched, sampled and shelved games are ranked by reviews, the words and time in your request, and your taste profile. The best 120 or so go to the AI, which chooses from them. Without an AI, picks come from the ranking alone.
+7. **Playing**: a pick links straight into Steam, Heroic, Galaxy, the Epic Games Launcher, Ubisoft Connect or, from the app window on Windows, the Xbox app.
 
-The AI sits behind one interface (`src/llm/`), so every backend does every AI task. [Where things go](contributing/code-map.md) says where each part lives in the code, and [the HTTP API](API.md) has the details of each step.
+## Other ways to pick
+
+Ask for the first two in a request; the others have their own place in the app:
+
+- **New to you** ("new to me"): short, gentle games in a genre or mechanic you've barely played, one genre per pick.
+- **A hidden gem** ("a hidden gem for tonight"): short, highly rated games the AI judged unusual, for their studio, their mechanics or how they play. The Lists page's Find hidden gems rates them first.
+- **Second chances**: games you abandoned, with what players have said about them since.
+- **Roll the dice**, beside Curate: one game you haven't started, or haven't played in a year, drawn at random with no AI.
+
+## The play diary
+
+Turn on the play diary (Profile, under Where it comes from) and UpNext notes which Steam games gained playtime each hour, and each time you press Play. Your profile then shows your habits, such as how long your weeknight sessions run, and picks use them.
+
+[The HTTP API](API.md) has the details of each step.

@@ -41,9 +41,7 @@ upnext pair requests             # devices asking to be allowed, with their numb
 upnext pair approve 4821         # allow the one showing 4821; `deny` refuses it
 
 upnext install-desktop [--remove]   # the launcher entry on Linux
-upnext migrate-data --from ./data
-upnext mock-library [--one-player]  # a made-up library and profile, into an empty database
-upnext healthcheck
+upnext migrate-data --from ./data   # move a library kept in a checkout's data folder
 upnext install-claude            # Claude Code from Anthropic, into UpNext's home folder
 ```
 

@@ -7,20 +7,18 @@ Picks, review summaries, series guides, second chances and hidden gems use an AI
 - **`copilot-cli`**: GitHub's [Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/copilot-cli/about-copilot-cli) on your Copilot plan, Copilot Free included. Install it (`winget install GitHub.Copilot` on Windows, `npm install -g @github/copilot` anywhere) and run `copilot login` once. UpNext turns off Copilot's tools, MCP servers and custom instructions for each call. Picks default to Claude Sonnet 5.5 and summaries to Claude Haiku 5.5; on Copilot Free, choose Auto, the only model it allows.
 - **`api-key`**: the Anthropic API with your key (`ANTHROPIC_API_KEY`), billed per token. `sonnet`, `opus` and `haiku` mean `claude-sonnet-5-5`, `claude-opus-5-5` and `claude-haiku-5-5`, and full model ids work too.
 - **`openai-key`**: the OpenAI API with your key (`OPENAI_API_KEY`). Summaries and guides use OpenAI's cheaper Flex tier when it has room.
-- **`openai`**: any OpenAI-compatible server, such as Ollama, LM Studio, llama.cpp, vLLM or OpenRouter. Give its address, model and optional key in Settings or with `UPNEXT_OPENAI_*`. A model that thinks before it answers (Qwen on vLLM) is asked not to when the server is on your own computer or network, which makes picks much quicker; Settings › Picks' Thinking choice changes that.
+- **`openai`**: any OpenAI-compatible server, such as Ollama, LM Studio, llama.cpp, vLLM or OpenRouter. Give its address, model and optional key in Settings or with `UPNEXT_OPENAI_*`. A model that thinks before it answers is asked not to on your own computer or network; Settings › Picks' Thinking choice changes that.
 
-With the Claude Code, Codex or Copilot CLI, UpNext runs the program on your own plan and never reads its credentials. With a local server such as Ollama, nothing leaves your machine.
+With a CLI, UpNext runs the program on your own plan and never reads its credentials. With a local server, nothing leaves your machine.
 
 ## Models and cost
 
-Picks and review summaries default to Sonnet on the Claude CLI. With an API key, picks default to Sonnet 5.5 and review summaries to Haiku 5.5, which writes them nearly as well at about a twentieth of the price.
+Picks and review summaries default to Sonnet on the Claude CLI. With an API key, picks default to Sonnet 5.5 and review summaries to Haiku 5.5.
 
-A pick's prompt is about 27k input tokens. Asking the same request again on the same day reuses most of it from the provider's prompt cache. Settings › AI usage shows every call's tokens by day, task and model, and, if you like, what they cost at list prices; on a subscription that's what the same calls would cost on the API. On a subscription it also shows the plan's usage bars, read in ways that spend nothing.
-
-Review summaries, second chances and hidden gems can run on a second AI, such as a model at home, while picks stay on your subscription (Settings › Picks, "Summaries").
+Settings › AI usage shows each call's tokens and what they would cost at list prices. Review summaries, second chances and hidden gems can use a cheaper or local AI (Settings › Picks, "Summaries").
 
 ## What runs on its own
 
-The AI jobs (review summaries, series guides, second chances, hidden gems) are off until you turn them on in Settings › Jobs or the setup wizard, which shows an estimate of what a first run takes. Picks work without any AI, from UpNext's own ranking.
+The AI jobs (review summaries, series guides, second chances, hidden gems) are off until you turn them on in Settings › Jobs or the setup wizard, which shows an estimate of what a first run takes. Picks work without an AI, from UpNext's own ranking.
 
-To see exactly what a pick sends, `upnext prompt "…"` prints the prompt without sending it. [Privacy](privacy.md) lists what each AI task is given.
+`upnext prompt "…"` prints what a pick would send. [Privacy](privacy.md) lists what each AI task is given.
