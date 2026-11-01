@@ -1,10 +1,8 @@
 # Games: the GameView
 
-[API index](../API.md) · [The library](library.md) · [Titles and copies](titles.md)
-
 ## Sources and launchers
 
-Games come from several libraries and are keyed by a stable internal integer `id`, not the Steam appid:
+Games come from several libraries. Each is keyed by an internal integer `id`, not the Steam appid:
 
 | `source` | `launcher` | `source_id` | `run_url` | Playtime known |
 |---|---|---|---|---|
@@ -19,7 +17,7 @@ Games come from several libraries and are keyed by a stable internal integer `id
 | xboxone | xboxone | Microsoft Store id, in lower case | `shell:AppsFolder\{family}!{app}` | no |
 | origin, uplay, battlenet, xboxone | manual | the title's key | none | no |
 
-Fetching details matches non-Steam games by name against the Steam store, so they still get genres, tags and reviews; `appid` is then the matched appid and `steam_matched` is true. With no match, `appid` is null and only the launcher's own details (art, description, genres) are there. The same `(source, source_id)` seen from two launchers (Steam natively and through Galaxy, say) is one row, and the native launcher wins. [More stores](more-stores.md) has Epic, the EA app, Ubisoft Connect, the Xbox app and games added by hand.
+Fetching details matches non-Steam games by name against the Steam store. On a match `appid` is the matched appid and `steam_matched` is true. With no match, `appid` is null and only the launcher's own details are there. The same `(source, source_id)` seen from two launchers is one row, and the native launcher wins. [More stores](more-stores.md) has Epic, the EA app, Ubisoft Connect and the Xbox app. [Games added from no store](added-games.md) has `manual` copies.
 
 ## The GameView
 
@@ -47,12 +45,12 @@ A game in every answer is a `GameView`. Each is a title, which groups a game's c
 
 - `id` is the title id, used in every URL and in picks. `appid` is null for a non-Steam game with no store match.
 - `playtime_known` is false for games from Heroic, which doesn't track playtime; they stay `untouched` until marked. `playtime_minutes` is the most any copy that tracks it reports.
-- `header_image` is the Steam header for Steam games and matched games, otherwise the launcher's cover art, and is never null. `art_square` is portrait or square art when the launcher has it.
+- `header_image` is the Steam header for Steam games and matched games, otherwise the launcher's cover art. It is not null. `art_square` is portrait or square art when the launcher has it.
 - `store_url` is the store page of the preferred copy (Steam, Epic, GOG or Amazon).
 - `status` and `override` are explained in [Statuses](statuses.md), with `kind`, `no_ending`, `staple`, `shelved_at`, `abandoned_at`, `burnt_out_until`, `stop_reasons`, `override_at`, `rejections`, `abandoned_by_picks`, `too` and `chosen`.
 - `review_score` is Steam's 1 to 9 bucket, `review_desc` its label ("Very Positive"), `review_pct` the positive percentage. `hltb_*` are hours.
 - Nullable: `appid`, `art_square`, `type`, `short_description`, `metacritic`, `release_date`, `review_*`, `hltb_*`, `override`, `override_note`. `genres`, `categories` and `developers` may be empty.
-- `controller_support` is Steam's word for how well a gamepad works with it, `full` or `partial`, from the store details; null when Steam doesn't say, which mostly means a mouse and keyboard.
+- `controller_support` is `full` or `partial` as Steam says, or null.
 
 Other fields belong to features with pages of their own:
 
@@ -67,7 +65,7 @@ Other fields belong to features with pages of their own:
 | `second_chance`, `second_try` | [Second chances](second-chances.md) |
 | `seed_date` | [Shared game data](seed.md) |
 | `backlog` | [Backlog verdicts from others](community-verdicts.md) |
-| `hidden_scope`, `own_copy` | [Hiding games](hiding.md) |
+| `hidden_scope`, `own_copy` | [Hiding games](library.md#hiding-games) |
 | `from_wishlist` (game page only) | [Wishlist](wishlist.md) |
 
 Lists carry a slimmer `GameView` than `GET /api/games/{id}`: only the game page has `tags_by_source`, for example.

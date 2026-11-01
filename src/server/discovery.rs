@@ -1,4 +1,4 @@
-//! Discovery (docs/api/discovery.md and gems.md): the Hidden gems shelf,
+//! Discovery (docs/api/discovery.md): the Hidden gems shelf,
 //! and a game's ways in for New to you. Picks in either mode go through
 //! `POST /api/picks`.
 

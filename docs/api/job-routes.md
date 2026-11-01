@@ -1,7 +1,5 @@
 # Starting and following jobs
 
-[API index](../API.md) · [Jobs](jobs.md) · [Scheduled jobs](schedules.md)
-
 Each route answers with the `Job` that [Jobs](jobs.md) describes.
 
 ## GET /api/jobs
@@ -17,7 +15,7 @@ Answers `202` with the `Job`. `400` for a task together with a kind or options. 
 
 ## POST /api/jobs/current/cancel
 
-Answers with the `Job`, `cancel_requested: true`. It stops at its next check, about a second, and ends `cancelled`; an AI call still running is cut off, though a provider that charges per call may still charge for it. It works for a job running in a terminal too. `404` when none is running.
+Answers with the `Job`, `cancel_requested: true`. It ends `cancelled` within about a second. An AI call still running is cut off, though a provider that charges per call may still charge for it. It works for a job running in a terminal too. `404` when none is running.
 
 ## GET /api/jobs/{id}
 
@@ -25,7 +23,7 @@ Answers with the `Job`, `cancel_requested: true`. It stops at its next check, ab
 
 - `failures`: `[{"lane": "Steam reviews", "source": "Steam reviews", "options": ["reviews", "review_texts"], "title_id": 1234, "name": "Portal 2", "error": "HTTP 429 Too Many Requests for https://store.steampowered.com/appreviews/620", "at": 1758990600}]`. `options` are the enrich options that fetch what failed (empty for the Steam store step, which always runs). A pass's failure has no `title_id`, and an AI series guide's `name` is the series. A title an AI summaries reply left out is a failure too, with source `digests`.
 - `can_retry`: whether `retry-failed` has anything to run.
-- `log`: `[{"id": 881, "at": 1758990600, "level": "warn", "lane": "Steam reviews", "message": "Steam asked us to slow down, trying again in 40 s (…, try 4 of 5)"}]`, oldest first, with `log_more` when more lines follow. `level` is `info`, `warn` or `error`, and warnings and errors that UpNext's own code logs during the job land here too. Page it with `after` (a line's `id`), `level=warn` (warnings and errors) or `error`, and `limit` (up to 5,000).
+- `log`: `[{"id": 881, "at": 1758990600, "level": "warn", "lane": "Steam reviews", "message": "Steam asked us to slow down, trying again in 40 s"}]`, oldest first, with `log_more` when more lines follow. `level` is `info`, `warn` or `error`. Page it with `after` (a line's `id`), `level=warn` (warnings and errors) or `error`, and `limit` (up to 5,000).
 
 `404` for an unknown id. A game hidden from the player asking reads "a hidden game" in every job route and in `GET /api/logs`.
 

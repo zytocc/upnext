@@ -1,8 +1,6 @@
 # Only on this computer
 
-[API index](../API.md) · [Who can use the API](access.md)
-
-Whatever the token, these answer only on the computer UpNext runs on, so a token or a paired device can't hand out more access or reach the server's files. Anything else gets `403`. That holds behind a proxy on this computer too, where every request comes from loopback: the rule is who asks (no token, a loopback peer, a loopback `Host`), not where the connection comes from.
+Whatever the token, these answer only on the computer UpNext runs on. Anything else gets `403`, behind a proxy on this computer too: the rule is who asks (no token, a loopback peer, a loopback `Host`), not where the connection comes from.
 
 - `POST /api/gog/window`, which opens a window on the server's desktop;
 - making a token (`POST /api/tokens`) or a pairing code (`POST /api/pairing`), and reading or ending a waiting code (`GET` and `DELETE /api/pairing`, `GET /api/pairing/outcome`);

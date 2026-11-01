@@ -1,21 +1,17 @@
 # Taste profile
 
-[API index](../API.md) · [Patterns](taste-patterns.md) · [Taste sources](taste-sources.md) · [Questions and play diary](diary.md)
-
-What UpNext knows about you as a player: favourites with why, likes, dislikes and hard nos, habits, and patterns counted from how you play and react. `/api/profile` is the Steam profile, so these live under `/api/taste`.
+Favourites with why, likes, dislikes and hard nos, habits, and patterns counted from how you play. `/api/profile` is the Steam profile, so these live under `/api/taste`. Patterns and how picks read the profile are on [Patterns](taste-patterns.md); the sources are on [Taste sources](taste-sources.md).
 
 ## Subjects
 
 A like, dislike or hard no is about one subject:
 
 - `facet:<scale>:<value>`, a review-tag value, such as `facet:grind:heavy`;
-- `tag:<tag>`, such as `tag:Horror` (a tag on UpNext's list is spelled its way, others as written);
+- `tag:<tag>`, such as `tag:Horror`;
 - `length:short` (main story under 10 hours), `length:medium` (10 to 30) or `length:long` (over 30);
 - `text:<your words>`, read only by the AI.
 
-For a like, a dislike or a pattern, a tag matches a game's ten strongest tags (Steam's, else the merged tags from GOG, RAWG, IGDB and PCGamingWiki) and its store genres. A hard no reaches less far: a game's five strongest tags from Steam or its GOG copy, plus its store genres, so a game with no Steam or GOG tags is left out only by its genres.
-
-Patterns, and how picks read the profile, are on [Patterns](taste-patterns.md).
+A tag matches a game's ten strongest tags and its store genres. A hard no reaches less far: the five strongest tags from Steam or GOG, plus store genres.
 
 ## GET /api/taste
 
@@ -35,11 +31,11 @@ Patterns, and how picks read the profile, are on [Patterns](taste-patterns.md).
  "rules": {"half_life_days": 365, "min_games": 4}}
 ```
 
-- `favourites`, most played first. `why` is what you chose it for; `choices` what the game offers: what players praise (`aspect:…`), its review-tag values (`facet:…`) and its six strongest tags (`tag:…`).
-- `statements`: likes, dislikes and hard nos, by label. `matches` counts the games in the library it's about (null for your own words).
-- `habits`: `weeknight` and `weekend` (minutes a session usually is), `times` (`mornings`, `afternoons`, `evenings`, `late_nights`), `who` (`solo`, `partner`, `friends`, `kids`) and `where` (`desk`, `couch`, `deck`), each with an optional note.
-- `patterns`, surest first, then `hidden_patterns`. A pattern's `games` list its side first, heaviest first. `outcome` is `favourite`, `staple`, `beaten`, `played_through`, `still_playing`, `picked`, `shelved`, `abandoned`, `not_for_me` or `turned_down`, and `reasons` the game reasons you gave for putting it down. `summary` counts the recent games, then the older ones: "5 shelved; 1 played through (and 15 older ones)".
-- `judged`: the games the patterns read. `suggestions`: about 12 of your most-played games, recent play weighted up, that aren't favourites. `subjects`: what a like or dislike can be about, with how many games each matches. `diary`: see [the play diary](diary.md#what-the-diary-shows).
+- `favourites`, most played first. `why` is what you chose it for; `choices` is what the game offers.
+- `statements`: likes, dislikes and hard nos. `matches` counts the games in the library it's about (null for your own words).
+- `habits`: `weeknight` and `weekend` (minutes a session usually is), `times`, `who` and `where`, with the same values as a [routine](routines.md), each with an optional note.
+- `patterns`, surest first, then `hidden_patterns`. A pattern's `games` list its side first, heaviest first. `summary` counts the recent games, then the older ones.
+- `suggestions`: about 12 of your most-played games that aren't favourites. `subjects`: what a like or dislike can be about, with how many games each matches. `diary`: see [the play diary](diary.md#what-the-diary-shows).
 
 ## POST /api/taste/statements
 
@@ -47,16 +43,16 @@ Patterns, and how picks read the profile, are on [Patterns](taste-patterns.md).
 - `{"kind": "like" | "dislike" | "hard_no", "about": "tag:Horror", "note": "…"}`: a subject that already has one becomes this kind.
 - `{"kind": "context", "about": "who", "why": ["solo", "friends"], "note": "…"}`: a habit's answer replaces the one before.
 
-Answers `201` with the row: `{"id", "kind", "title_id", "about", "why", "note", "source": "stated", "evidence", "confidence", "hidden", "created_at", "updated_at"}`. `400` for an unknown kind, subject, reason or choice, a game not in the library, a note over 300 characters, or `pattern`.
+Answers `201` with the row. `400` for an unknown kind, subject, reason or choice, a game not in the library, a note over 300 characters, or `pattern`.
 
 ## PUT /api/taste/statements/{id}
 
 - A like, dislike or hard no: `{"kind": "hard_no"}` and/or `{"note": "…"}` (an empty note clears it).
 - A favourite or a habit: `{"why": [...]}` and/or `{"note": "…"}`.
-- A pattern: `{"hidden": true}` ("Not really"), `{"hidden": false}` ("Show again") or `{"confirm": true}` ("That's right"), which makes it a like (stick) or a dislike (drift) about its subject and answers with that row.
+- A pattern: `{"hidden": true}`, `{"hidden": false}` or `{"confirm": true}`, which makes it a like (stick) or a dislike (drift) about its subject and answers with that row.
 
 Answers with the row. `400` for a change that doesn't fit the kind; `404` for an unknown id.
 
 ## DELETE /api/taste/statements/{id}
 
-`204`. A pattern can't be deleted (`400`), since it comes back while the evidence is there; hide it instead. `404` for an unknown id.
+`204`. A pattern can't be deleted (`400`); hide it instead. `404` for an unknown id.

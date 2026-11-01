@@ -1,21 +1,25 @@
 # Wishlist
 
-[API index](../API.md) · [Wishlist in picks](wishlist-picks.md) · [Series](collections.md)
-
-Games you don't own: suggestions from the series you've played, games you add by name, and your Steam wishlist, read only. It isn't a store, so there are no links, prices or sales. Everything here is behind the `wishlist` setting (on by default; Settings › Picks, "Wishlist and suggestions"). With it off there are no suggestions, no Steam wishlist read and no store data fetched, the Lists tab is hidden, and `GET /api/wishlist` and `from_wishlist` are empty. What's stored stays until it's deleted from [What UpNext knows about you](taste-sources.md).
+Games you don't own: suggestions from the series you've played, games you add by name, and your Steam wishlist, read only. Everything here is behind the `wishlist` setting (on by default). With it off there are no suggestions, no Steam wishlist read and no store data fetched, and `GET /api/wishlist` and `from_wishlist` are empty. What's stored stays until it's deleted from [What UpNext knows about you](taste-sources.md). The AI's suggestion in a lineup is on [Wishlist in picks](wishlist-picks.md).
 
 ## Where rows come from
 
-- **Your series** (`source: "collection"`): a series' entries you don't own that have a Steam appid on Wikidata, where the series means something to you: at least 10 hours played across its games you own, or one of them beaten or a favourite. The reason names that history ("You played Half-Life and Half-Life 2 for 25 hours. This one came after them, in 2007."). Most-played series first; at most 3 suggestions from one series and 30 in all wait at once.
-- **Your Steam wishlist** (`source: "steam"`, `on_steam: true`), read with `IWishlistService/GetWishlist` for your SteamID (with the Web API key when there is one), names from the store's `GetItems`. A game on it is never a suggestion: a suggestion that turns up there is wishlisted. A game taken off it on Steam loses `on_steam`, and one that only came from Steam is dismissed. A private or empty answer leaves the copy as it was. UpNext never writes to Steam.
+- **Your series** (`source: "collection"`): entries of a series you don't own, where the series means something to you (many hours played, or one of its games beaten or a favourite). The reason names that history. Most-played series first, with a few suggestions per series and a cap in all.
+- **Your Steam wishlist** (`source: "steam"`, `on_steam: true`), read for your SteamID. A game on it is never a suggestion: a suggestion that turns up there is wishlisted. A game taken off it on Steam loses `on_steam`, and one that only came from Steam is dismissed. UpNext never writes to Steam.
 - **By name** (`source: "manual"`), from `POST /api/wishlist`, found with Steam's store search.
-- **A lineup** (`source: "pick"`, `batch_id` the lineup): the AI's suggestion of a game you don't own ([Wishlist in picks](wishlist-picks.md)).
+- **A lineup** (`source: "pick"`, `batch_id` the lineup): the AI's suggestion of a game you don't own.
 
-A suggestion is shown only when it's a game on Steam's store, 80% or more of at least 50 Steam reviews are positive, you don't own it on any store UpNext syncs (by Steam appid, then by name with editions folded in: "Dishonored" is owned by "Dishonored - Definitive Edition", "The Witcher 3" isn't), you haven't answered it, and it isn't a hard no (by its five strongest Steam tags or its store genres).
+**Eligibility.** A suggestion, from a series or a lineup, is shown only when:
+
+- it's a game on Steam's store;
+- 80% or more of at least 50 Steam reviews are positive;
+- you don't own it on any store UpNext syncs (by Steam appid, then by name with editions folded in);
+- you haven't answered it (wishlisted, Not interested, I own it elsewhere);
+- it isn't a hard no.
 
 ## The `wishlist` task
 
-"Update the wishlist" runs after Fetch details, whose series it reads. It takes games now in the library off the wishlist, reads the Steam wishlist, checks your series (reviews first, so a poorly rated game costs one request), then fetches what each row lacks: store details, the review summary, Steam tags, art, and a HowLongToBeat time by name (kept on the row; three failures in a row stop it until the next run). No AI is used. Its log says what it found ("Your series: 12 games you don't own could be suggested; 4 new suggestions, 8 passed over…"). A sync, and `GET /api/wishlist`, also take games now in the library off the wishlist.
+"Update the wishlist" runs after Fetch details. It takes games now in the library off the wishlist, reads the Steam wishlist, checks your series, then fetches what each row lacks (store details, reviews, tags, art, a HowLongToBeat time). No AI is used. A sync, and `GET /api/wishlist`, also take games now in the library off the wishlist.
 
 ## GET /api/wishlist
 
@@ -41,7 +45,7 @@ States: `suggested`, `wishlisted`, `dismissed` (Not interested: never suggested 
 
 ## POST /api/wishlist
 
-`{"id": 4}` puts a row on the wishlist (a suggestion, or one said no to before). `{"name": "Hades II"}` finds a game on Steam's store and adds it, or wishlists the row it has already, and fetches its store data and art at once. Someone is waiting, so each request is tried once, for 8 seconds at most; store data that doesn't come back is left for the next run. Answers with the `GET` body.
+`{"id": 4}` puts a row on the wishlist (a suggestion, or one said no to before). `{"name": "Hades II"}` finds a game on Steam's store and adds it, or wishlists the row it has already, and fetches its store data and art at once. Answers with the `GET` body.
 
 `400` for neither, a name Steam's store doesn't know, or a game you own ("Hades II is in your library already, as Hades II"); `404` for an unknown id; `409` for a game in your library now, or with the setting off; `502` when Steam's store doesn't answer the search.
 

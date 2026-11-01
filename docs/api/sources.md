@@ -1,7 +1,5 @@
 # Sync and enrich sources
 
-[API index](../API.md) · [Jobs](jobs.md) · [Scheduled jobs](schedules.md) · [Game details](details.md)
-
 ## GET /api/sync/sources
 
 The libraries a sync reads, in order: `[{"id": "steam", "label": "Steam", "blocked": null}, {"id": "gog", "label": "GOG account", "blocked": "not connected"}]`. The ids are `steam`, `heroic`, `gog` (blocked without a GOG sign-in), `epic` (blocked without an Epic sign-in or the Epic Games Launcher), `ea`, `ubisoft` and `xbox` (blocked when nothing they installed is found; Windows only) and `galaxy` (blocked without `galaxy_db`).
@@ -12,4 +10,4 @@ One boolean per source, keyed by its id, plus `refresh` (fetch again what titles
 
 `GET /api/enrich/sources` lists them in run order: `[{"id": "hltb", "label": "HowLongToBeat", "default": false, "note": "slow", "blocked": null}]`. `note` is a word on cost ("slow", "uses the AI"), and `blocked` says why the settings keep a source from running ("needs a key", "needs an IGDB login", "Linux mode is off"). The ids are `wikidata`, `series`, `art`, `reviews`, `review_texts`, `tags`, `protondb`, `gog_meta`, `igdb`, `rawg`, `pcgw`, `hltb` (off by default), `libretro` (box art for [games added from an emulator](added-games.md#look-ups)), `trailers`, `digests` (off), `series_guides` (off), `second_chances` (off), `hidden_gems` (off) and `wishlist` (off; its own task).
 
-Sources that take every title run in parallel lanes, one per rate-limited service ([Jobs](jobs.md#the-job)). Steam cover art is fetched before the lanes start and again after them. Titles go in order: pick candidates first, then installed games, then the most-reviewed. The AI passes (review summaries, series guides) run three calls at a time.
+How an enrich runs is on [Jobs](jobs.md#the-job). Schedules for them are on [Scheduled jobs](schedules.md).

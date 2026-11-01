@@ -2,9 +2,9 @@
 
 The UpNext server answers on `http://127.0.0.1:8787` unless set otherwise. The UI uses this API, and so can scripts and other apps.
 
-- **Versions.** The contract is `/api/v1/…`. Adding a field or an endpoint stays within v1; removing or renaming one would mean v2. Unversioned `/api/…` paths answer the same as an alias outside the contract; these pages write paths that way for short, but scripts should use `/api/v1/…`.
-- **The precise contract** is the OpenAPI document at `GET /api/v1/openapi.json`, made from the code and kept as [`docs/openapi.json`](openapi.json). These pages are the readable guide.
-- **Bodies** are JSON. Times are Unix seconds and playtime is minutes unless a field says otherwise. Errors are `{"error": "…"}` with a plain reason, even for a path, query or body the server can't read. A `500` gives the real reason only on the computer UpNext runs on; any other device reads "Something went wrong on the server. UpNext's log on the computer it runs on says what."
+- **Versions.** The contract is `/api/v1/…`. Adding a field or an endpoint stays within v1. Unversioned `/api/…` paths are an alias outside the contract. These pages write paths that way for short, but scripts should use `/api/v1/…`.
+- **The precise contract** is the OpenAPI document at `GET /api/v1/openapi.json` ([`docs/openapi.json`](openapi.json)). It holds every field and status code. These pages give the rules a client has to handle.
+- **Bodies** are JSON. Times are Unix seconds and playtime is minutes unless a field says otherwise. Errors are `{"error": "…"}` with a plain reason. A `500` gives the real reason only on the computer UpNext runs on.
 - **Who it acts for.** Most routes answer for one player: the token's, the `UpNext-Player` header's, the browser's choice, or the default ([Players](api/players.md)).
 
 ## Access
@@ -18,7 +18,7 @@ The UpNext server answers on `http://127.0.0.1:8787` unless set otherwise. The U
 ## The library
 
 - [The server, its profile and its numbers](api/basics.md): health, config, stats, logs
-- [Games: the GameView](api/games.md) · [The library](api/library.md): search, Play later, Help me decide
+- [Games: the GameView](api/games.md) · [The library](api/library.md): search, Play later, Help me decide, hiding games
 - [Titles and copies](api/titles.md) · [Statuses, staples and stop reasons](api/statuses.md)
 - [Game details](api/details.md) · [Review tags](api/review-tags.md) · [Series](api/collections.md)
 - [Shared game data](api/seed.md)
@@ -28,7 +28,7 @@ The UpNext server answers on `http://127.0.0.1:8787` unless set otherwise. The U
 - [Picks](api/picks.md): asking, and history
 - [Lineups](api/lineups.md): spares, the card's actions, "It's too ___"
 - [Picks without AI](api/picks-without-ai.md) · [Ratings](api/ratings.md) · [Routines](api/routines.md)
-- [Discovery: new to you, and roll the dice](api/discovery.md) · [Hidden gems](api/gems.md)
+- [Discovery](api/discovery.md): new to you, hidden gems, roll the dice
 - [Second chances](api/second-chances.md)
 - [Wishlist](api/wishlist.md) · [Wishlist in picks](api/wishlist-picks.md)
 
@@ -45,7 +45,7 @@ The UpNext server answers on `http://127.0.0.1:8787` unless set otherwise. The U
 ## Stores and sync
 
 - [Steam](api/steam.md) · [GOG](api/gog.md) · [Epic, Galaxy and the other stores](api/more-stores.md) · [The Xbox app](api/xbox-app.md)
-- [Games added from no store](api/added-games.md): emulators, mods, VR
+- [Games added by hand](api/added-games.md): emulators, mods, VR, lists of titles
 - [Big screen and the Steam shortcut](api/steam-shortcut.md)
 - [Jobs](api/jobs.md) · [Starting and following jobs](api/job-routes.md)
 - [Scheduled jobs](api/schedules.md) · [Sync and enrich sources](api/sources.md)
@@ -53,12 +53,12 @@ The UpNext server answers on `http://127.0.0.1:8787` unless set otherwise. The U
 
 ## AI
 
-- [AI backends](api/ai-backends.md): Claude models, a separate AI for summaries, the test call
-- [ChatGPT through the Codex CLI](api/ai-codex.md) · [GitHub Copilot through the Copilot CLI](api/ai-copilot.md) · [OpenAI API key](api/ai-openai-key.md) · [Another provider](api/ai-openai-compatible.md)
-- [AI usage](api/ai-usage.md) · [AI estimates](api/ai-estimates.md) · [Prices and plans](api/ai-prices.md)
+- [AI backends](api/ai-backends.md): settings every backend has, Claude models, a separate AI for summaries, the test call
+- [AI providers](api/ai-providers.md): Codex CLI, Copilot CLI, OpenAI API key, another provider
+- [AI usage and estimates](api/ai-usage.md) · [Prices and plans](api/ai-prices.md)
 
 ## Settings, setup and players
 
 - [Settings](api/settings.md)
-- [First-run setup](api/setup.md) · [What the wizard reads](api/setup-wizard.md) · [Background work and uploads](api/setup-background.md)
-- [Players](api/players.md) · [Hiding games](api/hiding.md) · [Store accounts](api/accounts.md) · [AI accounts](api/ai-accounts.md)
+- [First-run setup](api/setup.md) · [What the wizard reads](api/setup-wizard.md)
+- [Players](api/players.md) · [Store and AI accounts](api/accounts.md)

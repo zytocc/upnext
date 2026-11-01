@@ -1,23 +1,21 @@
 # The server, its profile and its numbers
 
-[API index](../API.md) · [Settings](settings.md) · [The library](library.md)
-
 ## GET /api/health
 
 ```json
 {"app": "upnext", "version": "0.1.0", "build": "abc1234", "container": false, "id": "4f2a9c01d3e85b67"}
 ```
 
-Which program answers on the port, its version, and its build: the short commit it was built from, or `null` for a build made without git (a container build from a source tree without `.git`).
+Which program answers on the port, its version, and its build: the short commit it was built from, or `null` for a build made without git.
 
-- `upnext app` asks it before opening a window on a port, to tell a running UpNext from another program; anything without this answer is another program. `upnext healthcheck`, the container's health check, asks it too and prints the version and build, as Settings › About shows them.
-- The window compares `version` and `build` with its own. Another version, or the same version with another build or none, still gets the window, but every page shows a bar saying which build each is and to quit the other UpNext, since two servers on one library would run its scheduled jobs twice. A window built without git compares versions only.
-- `container` is true in the container image (`UPNEXT_CONTAINER=1`). The pairing page, which has no token yet, reads it to say the code is in the container's log.
-- `id` is the install id the network announcement carries. The app window on another computer checks it before sending that computer its token.
+- `upnext app` and `upnext healthcheck` ask it. Anything without this answer is another program.
+- The window compares `version` and `build` with its own. When they differ, every page shows a bar saying to quit the other UpNext, since two servers on one library would run its scheduled jobs twice.
+- `container` is true in the container image (`UPNEXT_CONTAINER=1`). The pairing page reads it to say the code is in the container's log.
+- `id` is the install id the network announcement carries.
 
 ## GET /api/openapi.json
 
-This API as an OpenAPI 3.1 document, made from the code, so it's the precise contract: every path (relative to `/api/v1`), its parameters, bodies, answers and schemas, and who may call it (`security`: a `read` or `full` token, or a paired browser; `x-local-only` for what answers only on this computer). A copy is in [`docs/openapi.json`](../openapi.json), and the tests fail when it differs from what the code serves (`UPNEXT_UPDATE_OPENAPI=1 cargo test openapi` writes it again).
+This API as an OpenAPI 3.1 document, the precise contract: every path (relative to `/api/v1`), its parameters, bodies, answers and schemas, and who may call it (`security`; `x-local-only` for what answers only on this computer). A copy is in [`docs/openapi.json`](../openapi.json).
 
 ## GET /api/profile
 
@@ -31,7 +29,7 @@ This API as an OpenAPI 3.1 document, made from the code, so it's the precise con
  ]}
 ```
 
-`persona_name`, `avatar`, `profile_url` and `last_sync` may be null before the first sync. `configured` is false when that launcher's credentials or files aren't there. `note`, when present, says which way a store's games come in ("Heroic + GOG account") and goes under the label. `game_count` counts titles, and `copy_count` store copies. A player other than the first gets the `steam_local` profile source only when their own SteamID is signed in here, and `heroic` only when their own folder is set.
+`persona_name`, `avatar`, `profile_url` and `last_sync` may be null before the first sync. `configured` is false when that launcher's credentials or files aren't there. `note`, when present, says which way a store's games come in ("Heroic + GOG account"). `game_count` counts titles, and `copy_count` store copies. A player other than the first gets the `steam_local` source only when their own SteamID is signed in here, and `heroic` only when their own folder is set.
 
 ## GET /api/config
 
@@ -66,12 +64,12 @@ What the server runs with:
 }
 ```
 
-`genres` and `tags` are sorted by count, most first. `top_played` is the ten most-played games.
+`genres` and `tags` are sorted by count, most first, and `top_played` is the ten most-played games. `by_source` counts titles per store.
+
+It also gives `copies` (store rows), `multi_store` (titles owned on two or more stores), `rated`, `with_review_texts`, `with_digests`, `with_xref`, `with_rawg`, `with_pcgw` and `by_linux` (`native`, each ProtonDB tier, or `unknown`, to a count, leaving out what isn't a game).
 
 ## Logs
 
 `GET /api/logs?level=warn` gives the server's recent warnings and errors (the last 300), oldest first: `[{"at": 1758990600, "level": "warn", "message": "…", "job_id": 42}]`. `job_id` is null outside a job, `level=error` gives errors only, and an unknown `level` is `400`. A job's own log is under [Jobs](jobs.md).
 
-## The UI
-
-Everything not under `/api/` serves the built UI from `web/dist`, embedded in the binary, with `index.html` for the UI's own routes. A path under `/api/` that no route matches answers `404 {"error": "no such API route: /api/v1/…"}`, and a known path with a method it doesn't take answers `405`.
+A path under `/api/` that no route matches answers `404`, and a known path with a method it doesn't take answers `405`.
