@@ -1,6 +1,6 @@
 # The store page's text
 
-Drafts for UpNext's page on Steam, in plain language, for the maintainer to paste into Steamworks (Store presence, Edit store page) and adjust. `docs/dev/RELEASE.md`, "The Steam copy", has the order of the steps around them.
+Drafts for UpNext's page on Steam, in plain language, for the maintainer to paste into Steamworks (Store presence, Edit store page) and adjust. `contrib/steam/README.md`, "Steamworks (once)", has the order of the steps around them.
 
 | File | Where it goes |
 |---|---|

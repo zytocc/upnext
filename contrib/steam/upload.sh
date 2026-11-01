@@ -1,12 +1,12 @@
 #!/bin/sh
 # Upload the depots build-depots.sh made to Steam, as one build set live on
-# a beta branch (docs/dev/RELEASE.md, "The Steam copy").
+# a beta branch (contrib/steam/README.md).
 #
 #   upload.sh --depots DIR [--branch beta] [--desc TEXT] [--dry-run]
 #
 # The ids come from Steamworks, in STEAM_APP_ID, STEAM_DEPOT_LINUX and
 # STEAM_DEPOT_WINDOWS; STEAM_USERNAME is the builder account, whose sign-in
-# steamcmd has saved already (RELEASE.md says how). STEAMCMD is the
+# steamcmd has saved already (contrib/steam/README.md says how). STEAMCMD is the
 # steamcmd to run (`steamcmd` by default). With --dry-run it fills in the
 # build files, checks them and both depots, and says what it would run,
 # without steamcmd or any network.
@@ -33,7 +33,7 @@ depots=$(readlink -f "$depots")
 fail() { echo "$*" >&2; exit 1; }
 for v in STEAM_APP_ID STEAM_DEPOT_LINUX STEAM_DEPOT_WINDOWS; do
   case $(printenv "$v" || true) in
-    '' | *[!0-9]*) fail "$v must be the number Steamworks gave (docs/dev/RELEASE.md, \"The Steam copy\")" ;;
+    '' | *[!0-9]*) fail "$v must be the number Steamworks gave (contrib/steam/README.md, \"Steamworks (once)\")" ;;
   esac
 done
 # A build goes live on the default ("public") branch only by hand, once it
