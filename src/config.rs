@@ -207,7 +207,7 @@ pub struct Config {
     /// Let the AI read other backlog players' verdicts: their points in the
     /// ranking that chooses picks' candidates, the `bv` lines in picks, "too"
     /// and Help me decide, and Second Chance's line. One switch, so with it
-    /// off the AI is given what it would be with none kept (`docs/verdicts/reading.md`).
+    /// off the AI is given what it would be with none kept (`docs/verdicts/snapshot.md`).
     /// On by default since the A/B on the mock library.
     pub verdicts_prompt: bool,
     /// Signing in through an identity provider: its

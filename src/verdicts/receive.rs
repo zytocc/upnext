@@ -1,4 +1,4 @@
-//! Receiving backlog verdicts (`docs/verdicts/reading.md`): the
+//! Receiving backlog verdicts (`docs/verdicts/snapshot.md`): the
 //! daily job downloads the snapshot's manifest from `verdicts_url`, and when
 //! it names a newer snapshot, the summary file, which is checked whole and
 //! put in place of the one kept in one transaction. Nothing is sent: the

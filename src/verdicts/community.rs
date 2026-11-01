@@ -1,5 +1,5 @@
 //! Everyone's backlog verdicts about a game, as an install reads them from
-//! the snapshot (`docs/verdicts/reading.md`).
+//! the snapshot (`docs/verdicts/snapshot.md`).
 //!
 //! A game's published counts become, without an AI call:
 //! - [`Backlog`], what a game carries through the library: the headline
