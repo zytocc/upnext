@@ -10,12 +10,15 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:demo": "tsc -b && node scripts/demo-build.mjs",
     "lint": "oxlint",
     "test": "vitest run",
     "e2e": "playwright test",
     "preview": "vite preview",
     "gen:api": "openapi-typescript ../docs/openapi.json -o src/generated/api.ts",
-    "licenses": "node scripts/licenses.mjs"
+    "licenses": "node scripts/licenses.mjs",
+    "demo:record": "node scripts/demo-record.mjs",
+    "demo:check": "node scripts/demo-record.mjs --check"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",

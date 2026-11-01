@@ -156,6 +156,9 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npx vite build
+      # The online demo: the same UI answering from a recording
+      # (docs/contributing/demo.md).
+      - run: node scripts/demo-build.mjs
 
   # The backlog verdicts service (services/verdicts/): a Cloudflare
   # Worker tested in Miniflare, Cloudflare's local runtime, with no account
@@ -240,6 +243,11 @@ jobs:
       - run: npm ci
         working-directory: web
       - run: npx vite build
+        working-directory: web
+      # The online demo's recording still matches the API: this records the
+      # mock library again and compares the answers' keys
+      # (docs/contributing/demo.md).
+      - run: npm run demo:check
         working-directory: web
       # On GitHub's runner this installs Chromium's system libraries too; a
       # self-hosted runner has them (docs/dev/CI-RUNNERS.md) and keeps the

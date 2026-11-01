@@ -16,6 +16,7 @@ npx tsc -b
 npm run lint                             # oxlint
 npm test                                 # Vitest
 npx vite build
+node scripts/demo-build.mjs              # the online demo
 
 cd ../services/verdicts                  # the backlog verdicts service
 npm ci
@@ -47,6 +48,8 @@ npm run e2e
 ```
 
 `web/e2e/serve.sh` starts the server in a throwaway folder with its own `HOME`, so nothing on your machine is read.
+
+`npm run demo:check` in `web/` also needs the built server. It checks that [the online demo](demo.md)'s recording still matches the API.
 
 `UPNEXT_README_SHOT=1 npx playwright test readme-shot` remakes the README's screenshot (`docs/images/pick.png`) and the big-screen one (`docs/images/big-screen.png`) on the mock library. It needs a machine that can reach Steam's image servers.
 

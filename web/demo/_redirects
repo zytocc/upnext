@@ -1,0 +1,3 @@
+# Links in the app that a real server answers (a sign-in, a download) go
+# back to the start: the demo has no server.
+/api/*  /  302

@@ -8,6 +8,7 @@ All notable changes to UpNext are listed here. The format follows [Keep a Change
 
 - On Windows, the games the Xbox app installed come in by themselves, Game Pass games included, and Play starts them through Windows. Owned games you haven't installed, and playtime, still come from GOG Galaxy or a list typed in. Sync option: `xbox`.
 - One command installs UpNext on Linux: `curl -fsSL https://upnext.games/install.sh | sh`. It picks the right package for your distribution, checks its checksum, and updates UpNext when run again ([Linux](docs/install/linux.md#one-command)).
+- An online demo at [demo.upnext.games](https://demo.upnext.games) shows UpNext on a made-up library in your browser, with nothing to install. What you change there stays in that browser tab.
 
 ### Changed
 

@@ -22,6 +22,8 @@ It runs on your own computer and keeps everything in a local database. There are
 
 ## Try it
 
+[The online demo](https://demo.upnext.games) runs in your browser on a made-up library, with nothing to install.
+
 With Docker:
 
 ```sh

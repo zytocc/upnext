@@ -11,7 +11,7 @@ cargo clippy --all-targets --locked --no-default-features -- -D warnings
 cargo test --locked
 cargo deny --locked check
 node contrib/notices/generate.mjs --check
-(cd web && npm run licenses && npm run gen:api && git diff --exit-code src/generated/api.ts && npx tsc -b && npm run lint && npm test && npx vite build)
+(cd web && npm run licenses && npm run gen:api && git diff --exit-code src/generated/api.ts && npx tsc -b && npm run lint && npm test && npx vite build && node scripts/demo-build.mjs)
 (cd services/verdicts && npm ci && npm run licenses && npm run typecheck && npm run lint && npm test && npm run build)
 ```
 

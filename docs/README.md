@@ -28,4 +28,4 @@ Start with [the README](../README.md) for what UpNext is and how to install it.
 
 - [The HTTP API](API.md), with a page per area, and its OpenAPI document, [`openapi.json`](openapi.json).
 - [Backlog verdicts: the contract](VERDICTS.md) between UpNext and the verdicts service.
-- [Contributing](../CONTRIBUTING.md), with [the checks](contributing/checks.md) and [where things go](contributing/code-map.md).
+- [Contributing](../CONTRIBUTING.md), with [the checks](contributing/checks.md), [where things go](contributing/code-map.md) and [the online demo](contributing/demo.md).

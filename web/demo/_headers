@@ -1,0 +1,13 @@
+# Cloudflare Pages sends these headers with every page of the online demo.
+# The demo talks to no server: its scripts, styles and fonts are its own,
+# and only game covers come from Steam's image servers.
+/*
+  Content-Security-Policy: default-src 'self'; img-src 'self' data: https://cdn.cloudflare.steamstatic.com https://shared.cloudflare.steamstatic.com; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  Strict-Transport-Security: max-age=31536000
+  X-Robots-Tag: noindex
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
