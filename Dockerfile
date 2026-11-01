@@ -77,8 +77,8 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
 # to pass on signals and reap the AI CLIs' child processes; the upnext user
 # (uid 1000, home /data) added to the image's own passwd and group files;
 # and /data.
-FROM debian:trixie-slim@sha256:62bd423aeee912639ca8ee681c2b762cb3e25137e0a92b20be455898a9f034ad AS base
-FROM --platform=$BUILDPLATFORM debian:trixie-slim@sha256:62bd423aeee912639ca8ee681c2b762cb3e25137e0a92b20be455898a9f034ad AS files
+FROM debian:trixie-slim@sha256:f6b08b09a05725f9431502d3b5714f5c4576e82c1a84fa1debe0c24a7e0c3ec4 AS base
+FROM --platform=$BUILDPLATFORM debian:trixie-slim@sha256:f6b08b09a05725f9431502d3b5714f5c4576e82c1a84fa1debe0c24a7e0c3ec4 AS files
 ARG TARGETARCH
 ADD --checksum=sha256:c5b0666b4cb676901f90dfcb37106783c5fe2077b04590973b885950611b30ee \
     https://github.com/krallin/tini/releases/download/v0.19.0/tini-static /tini/amd64
