@@ -121,7 +121,7 @@ jobs:
       # its id to deny.toml's ignore list with a reason. Installed on every
       # run, self-hosted too (a release binary of a few MB), so the newest
       # cargo-deny always reads the advisory database.
-      - uses: taiki-e/install-action@1e29709c0ec63babbe8f266397a465f29a825f91 # v2.87.31
+      - uses: taiki-e/install-action@86f7a0ffb25f40114606501a311ebcfaf882ea32 # v2.88.0
         with:
           tool: cargo-deny
       - run: cargo deny --locked check
