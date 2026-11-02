@@ -79,6 +79,17 @@ foreach ($exe in 'upnext.exe', 'upnext-app.exe') {
         throw "$exe isn't in $BinDir. Build both programs first: cd web; npm ci; npm run build; cd ..; cargo build --release --bins"
     }
 }
+# The programs link the C runtime in (.cargo/config.toml): the Store
+# refuses a package that needs the Visual C++ Redistributable without its
+# listing saying so. A program that imports the runtime's DLLs names them
+# in its import table, in plain ASCII.
+foreach ($exe in 'upnext.exe', 'upnext-app.exe') {
+    $bytes = [IO.File]::ReadAllText((Join-Path $BinDir $exe), [Text.Encoding]::GetEncoding(28591))
+    $found = [regex]::Matches($bytes, '(?i)(vcruntime|msvcp)[0-9_]*\.dll') | ForEach-Object { $_.Value } | Sort-Object -Unique
+    if ($found) {
+        throw "$exe loads $($found -join ', ') from the Visual C++ Redistributable; build it with .cargo/config.toml's +crt-static"
+    }
+}
 foreach ($file in 'LICENSE-MIT', 'LICENSE-APACHE', 'THIRD_PARTY_NOTICES.txt') {
     if (-not (Test-Path -LiteralPath (Join-Path $Root $file) -PathType Leaf)) {
         throw "$file isn't in $Root; THIRD_PARTY_NOTICES.txt comes from: node contrib\notices\generate.mjs"
