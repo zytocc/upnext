@@ -1,8 +1,9 @@
 # Cloudflare Pages sends these headers with every page of the online demo.
 # The demo talks to no server: its scripts, styles and fonts are its own,
-# and only game covers come from Steam's image servers.
+# and only game art comes from Steam's image servers. demo-build.mjs puts
+# the hashes of index.html's inline scripts in place of INLINE_SCRIPTS.
 /*
-  Content-Security-Policy: default-src 'self'; img-src 'self' data: https://cdn.cloudflare.steamstatic.com https://shared.cloudflare.steamstatic.com; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' INLINE_SCRIPTS; img-src 'self' data: https://*.steamstatic.com; font-src 'self' data:; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()

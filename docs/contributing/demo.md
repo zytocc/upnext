@@ -8,7 +8,7 @@
 - A visitor's changes stay in memory in that tab: statuses, ratings, Play later, hiding, routines, the theme, the tour and lineups with their actions. A reload starts over from the recording.
 - Lineups are written ahead of time: one for each routine, each "Or try" suggestion and three typed requests. A typed request gets the lineup it shares the most words with. The dice draw from the games not started yet. No AI is asked.
 - Calls that need a real server answer 403 with a message that says so: syncs and other jobs, store and AI sign-ins, sending a backlog verdict, backups, pairing, players and the taste profile's edits.
-- Game covers load from Steam's image servers. Nothing else leaves the browser, and `web/demo/_headers` sets a Content-Security-Policy that allows nothing else.
+- Game art loads from Steam's image servers. Nothing else leaves the browser, and `web/demo/_headers` sets a Content-Security-Policy that allows nothing else. The build adds the hashes of `index.html`'s inline scripts to it.
 
 ## Files
 
