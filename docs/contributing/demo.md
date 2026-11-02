@@ -58,4 +58,3 @@ The demo is a Cloudflare Pages project of its own, built from `main`:
 | Build command | `cd web && npm ci && npm run build:demo` |
 | Build output directory | `web/dist-demo` |
 | Environment variable | `NODE_VERSION` = `24` |
-| Build watch paths | `web/*` |
