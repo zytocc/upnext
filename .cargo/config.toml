@@ -1,0 +1,10 @@
+# Windows builds link the C runtime into the programs (/MT) instead of
+# loading it from the Visual C++ Redistributable, which a PC may not have
+# installed and which the Microsoft Store counts as software the app
+# depends on. The C code of the dependencies (SQLite, the TLS library)
+# follows: the cc crate reads this flag.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.aarch64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]

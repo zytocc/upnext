@@ -22,12 +22,22 @@ impl Dirs {
     /// `config`, `cache`): the local folders, not the roaming ones, so a
     /// roaming profile doesn't copy the database from PC to PC. Elsewhere the
     /// local folders are the usual ones.
+    /// The Microsoft Store's copy uses `%LOCALAPPDATA%\upnext-store`
+    /// instead (`msix`).
     /// Without a home folder, `data`, `.` and `cache` under the current one.
     pub fn standard() -> Self {
+        if let Some(package) = crate::msix::get() {
+            return Self::under(&package.home);
+        }
         match directories::ProjectDirs::from("", "", "upnext") {
             Some(p) => Self { data: p.data_local_dir().into(), config: p.config_local_dir().into(), cache: p.cache_dir().into() },
             None => Self { data: "data".into(), config: ".".into(), cache: "cache".into() },
         }
+    }
+
+    /// `data`, `config` and `cache` in `home`, as on Windows.
+    fn under(home: &std::path::Path) -> Self {
+        Self { data: home.join("data"), config: home.join("config"), cache: home.join("cache") }
     }
 }
 
@@ -498,7 +508,14 @@ mod tests {
     #[test]
     fn windows_keeps_its_files_in_local_app_data() {
         let local = PathBuf::from(std::env::var_os("LOCALAPPDATA").expect("LOCALAPPDATA is set")).join("upnext");
-        let d = Dirs::standard();
-        assert_eq!((d.data, d.config, d.cache), (local.join("data"), local.join("config"), local.join("cache")));
+        assert_eq!(Dirs::standard(), Dirs::under(&local));
+    }
+
+    #[test]
+    fn a_home_holds_the_three_folders() {
+        let d = Dirs::under(std::path::Path::new("/home/you/AppData/Local/upnext-store"));
+        assert_eq!(d.data, PathBuf::from("/home/you/AppData/Local/upnext-store/data"));
+        assert_eq!(d.config, PathBuf::from("/home/you/AppData/Local/upnext-store/config"));
+        assert_eq!(d.cache, PathBuf::from("/home/you/AppData/Local/upnext-store/cache"));
     }
 }

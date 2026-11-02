@@ -13,6 +13,7 @@ All notable changes to UpNext are listed here. The format follows [Keep a Change
 ### Changed
 
 - The documentation is shorter and simpler, with fewer pages.
+- The Windows programs carry the Visual C++ runtime inside them, so they no longer need the Visual C++ Redistributable installed.
 
 ## [0.1.2] - 2026-10-26
 

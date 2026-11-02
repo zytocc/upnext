@@ -36,7 +36,7 @@ On NVIDIA with Wayland, WebKitGTK sometimes shows an empty window. `WEBKIT_DISAB
 
 ## Where it keeps things
 
-On Linux, the database and backups are in `~/.local/share/upnext` (`UPNEXT_DATA_DIR` moves them), `.env` is read from `~/.config/upnext`, and `~/.cache/upnext` is the AI CLI's working directory. On Windows the same three are `data`, `config` and `cache` in `%LOCALAPPDATA%\upnext`. The Flatpak keeps its own in `~/.var/app/io.github.zytocc.UpNext`. In Docker it is the `/data` volume. The database holds your GOG and Epic sign-ins too.
+On Linux, the database and backups are in `~/.local/share/upnext` (`UPNEXT_DATA_DIR` moves them), `.env` is read from `~/.config/upnext`, and `~/.cache/upnext` is the AI CLI's working directory. On Windows the same three are `data`, `config` and `cache` in `%LOCALAPPDATA%\upnext`; the Microsoft Store's copy keeps its own in `%LOCALAPPDATA%\upnext-store`, which Windows keeps in the package's folder and removes when it's uninstalled. The Flatpak keeps its own in `~/.var/app/io.github.zytocc.UpNext`. In Docker it is the `/data` volume. The database holds your GOG and Epic sign-ins too.
 
 Every setting can be changed in Settings or with `upnext config set <key> <value>`. App settings override `.env`, which overrides the defaults. `.env.example` lists the common variables and `upnext config list` every setting. In a `.env` on Windows, put paths in single quotes (`UPNEXT_DATA_DIR='D:\Games\upnext'`).
 

@@ -12,8 +12,8 @@ name: windows
 #
 # GitHub's Windows runners take twice the Linux minutes from a private
 # repository's allowance, and are slower everywhere, so it runs only when
-# Rust code, the fixtures, the files under contrib/ that the code builds in
-# or this file change (tests/workflow_paths.rs checks that list).
+# Rust code, the fixtures, the files under contrib/ that the code builds in,
+# Cargo's settings or this file change (tests/workflow_paths.rs checks that list).
 # workflow_dispatch runs it by hand.
 #
 # Windows test builds come from `cargo build --release --bins` on a Windows
@@ -33,6 +33,7 @@ on:
       - 'Cargo.toml'
       - 'build.rs'
       - 'Cargo.lock'
+      - '.cargo/**'
       - '.gitattributes'
       - '.github/workflows/windows.yml'
   pull_request:
@@ -45,6 +46,7 @@ on:
       - 'Cargo.toml'
       - 'build.rs'
       - 'Cargo.lock'
+      - '.cargo/**'
       - '.gitattributes'
       - '.github/workflows/windows.yml'
   workflow_dispatch:

@@ -184,7 +184,7 @@ mod tests {
     #[test]
     fn the_store_copy_is_started_through_its_alias() {
         let alias = std::path::PathBuf::from(r"C:\Users\you\AppData\Local\Microsoft\WindowsApps\upnext-app.exe");
-        let target = in_package(&crate::msix::Msix { launcher: alias.clone() });
+        let target = in_package(&crate::msix::Msix { launcher: alias.clone(), home: "/home/you/AppData/Local/upnext-store".into() });
         assert_eq!(target, Target { program: alias, arguments: "--big-screen".into() });
     }
 

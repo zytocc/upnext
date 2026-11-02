@@ -133,6 +133,12 @@ fn windows_and_docker_run_for_build_rs() {
     assert!(runs("docker.yml", &["build.rs"]));
 }
 
+#[test]
+fn windows_runs_for_cargos_settings() {
+    // .cargo/config.toml links the C runtime into the Windows programs.
+    assert!(runs("windows.yml", &[".cargo/config.toml"]));
+}
+
 /// Every `contrib/` path that the code names outside a comment: the files
 /// it builds in (icons, the desktop entry, Steam's artwork) and reads in its
 /// tests.

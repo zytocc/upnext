@@ -61,12 +61,12 @@ Uninstall the MSI first if it's installed (the library stays), so Start and the 
 Add-AppxPackage -Register .\layout\AppxManifest.xml
 ```
 
-1. Start lists "UpNext" and "UpNext (big screen)" with UpNext's icon, and each opens as from the MSI; "UpNext" opens the library that's in `%LOCALAPPDATA%\upnext`.
+1. Start lists "UpNext" and "UpNext (big screen)" with UpNext's icon, and each opens as from the MSI; "UpNext" opens a new library of its own, not the one in `%LOCALAPPDATA%\upnext`.
 2. In a new terminal, `upnext --version` prints the version, and `(Get-Command upnext).Source` is under `%LOCALAPPDATA%\Microsoft\WindowsApps`. `upnext-app` opens the usual window, not big screen: its alias belongs to the "UpNext (big screen)" entry, whose `--big-screen` an alias doesn't pass on.
-3. Change a setting and close UpNext from the tray's Quit. The files in `%LOCALAPPDATA%\upnext` changed, and `%LOCALAPPDATA%\Packages\UpNext.Test_*\LocalCache\Local` has no `upnext` folder: the package writes the real library, not a copy of its own.
+3. Change a setting and close UpNext from the tray's Quit. `%LOCALAPPDATA%\Packages\UpNext.Test_*\LocalCache\Local\upnext-store` holds `data`, `config` and `cache`, the files in `%LOCALAPPDATA%\upnext` (if the MSI ran here before) didn't change, and Explorer shows no `%LOCALAPPDATA%\upnext-store`: Windows keeps the package's files in its own folder. In the MSI's copy, Settings, Backups, Download a backup; in the Store copy, Settings, Backups, Import a database with it: the library comes across.
 4. Settings, Windows, Start with Windows: turning it on says to use Windows Settings, Apps, Startup, which lists UpNext. Turn it on there and sign out and back in: the tray icon appears with no window.
 5. With Steam closed, Settings, Big screen, Add to Steam; the shortcut's target is `%LOCALAPPDATA%\Microsoft\WindowsApps\upnext-app.exe --big-screen`, and starting it from Steam opens big screen.
 6. With Claude Code or Codex chosen in Settings, Picks, a pick works as from the MSI, and its sign-in is the one the terminal uses.
-7. `Get-AppxPackage UpNext.Test | Remove-AppxPackage` removes it; `%LOCALAPPDATA%\upnext` stays.
+7. `Get-AppxPackage UpNext.Test | Remove-AppxPackage` removes it and its `upnext-store` folder; `%LOCALAPPDATA%\upnext` stays.
 
 The release build's file submission to Microsoft, the Store submission, and checking a published release are in `docs/dev/RELEASE.md`.
